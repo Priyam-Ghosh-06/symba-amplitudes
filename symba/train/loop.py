@@ -76,8 +76,8 @@ def run_epoch(model, loader, optimizer, scheduler, criterion, device, tcfg,
             optimizer.step()
             scheduler.step()
 
-        total_loss += float(loss)
-        total_aux += float(aux)
+        total_loss += float(loss.detach())
+        total_aux += float(aux.detach())
         n_batches += 1
 
     return total_loss / max(1, n_batches), total_aux / max(1, n_batches)
