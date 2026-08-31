@@ -31,6 +31,13 @@ cleanly. This repository is built around that observation.
 Design rationale, the bug list this replaces, and the argument for each change
 live in [`docs/`](docs/).
 
+## Results
+
+QED **83.0%** symbolic exact match [70, 91] against a 70.2% retrieval ceiling
+and a 21.3% 1-NN baseline, with 100% parse and mass-dimension validity. Under a
+template split, where whole functional forms are held out, the model and every
+baseline score **0%**. See [RESULTS.md](RESULTS.md).
+
 ## Quick start
 
 ```bash
