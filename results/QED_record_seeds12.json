@@ -701,7 +701,7 @@
       }
     }
   },
-  "started": "2026-08-31 09:23:50",
+  "started": "2026-08-31 10:02:54",
   "data": {
     "theory": "QED",
     "n_records": 360,
@@ -747,6 +747,6 @@
         "unseen": {}
       }
     },
-    "build_seconds": 38.0
+    "build_seconds": 44.1
   }
 }
