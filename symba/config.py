@@ -85,7 +85,11 @@ class TrainConfig:
     # (02 §5.1: the CE floor was 0.8778 and the run reached 0.8828).
     select_on: str = "val_symbolic_em"
     eval_every: int = 2                 # free-running eval cadence, in epochs
-    beam_width: int = 4
+    beam_width: int = 4          # final test decoding
+    # Validation evals run every few epochs and only have to *rank* checkpoints,
+    # so they decode greedily. Beam search here has no KV cache and costs
+    # beam_width times more for a selection signal that barely changes.
+    select_beam_width: int = 1
     length_penalty: float = 0.7         # GNMT alpha; 0 disables
     constrained_decoding: bool = True
     device: str = "auto"

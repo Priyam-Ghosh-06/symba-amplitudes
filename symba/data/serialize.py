@@ -161,12 +161,29 @@ def from_prefix(tokens):
 
 
 def is_well_formed(tokens) -> bool:
-    """Parse-validity metric (01 SS6.1 metric 3) - does it parse at all?"""
-    try:
-        from_prefix(tokens)
-        return True
-    except (ValueError, TypeError, RecursionError):
-        return False
+    """Parse-validity metric (01 SS6.1 metric 3) - does it parse at all?
+
+    Purely syntactic: it walks the operand debt with :class:`PrefixState` and
+    never builds a sympy object. That matters because a *well-formed* but
+    pathological sequence like ``/ / / / ... m_b m_b ...`` is exactly what a
+    half-trained decoder emits, and constructing the corresponding sympy
+    expression triggers automatic simplification that can take minutes and
+    caches every intermediate.
+    """
+    state = PrefixState()
+    for token in tokens:
+        try:
+            state = state.advance(token)
+        except ValueError:
+            return False
+        if state.needed < 0:
+            return False            # more operands than any operator asked for
+    return state.is_complete()
+
+
+def operator_count(tokens) -> int:
+    """Number of operator tokens - a cheap proxy for expression complexity."""
+    return sum(1 for t in tokens if t in ARITY)
 
 
 # --- constrained decoding ----------------------------------------------------
@@ -183,12 +200,14 @@ class PrefixState:
     def __init__(self):
         self.needed = 1          # the whole expression is one operand
         self.in_integer = False  # inside a digit run, so digits stay legal
+        self.digits = 0          # digits seen in the current run
         self.started = False
 
     def copy(self) -> "PrefixState":
         other = PrefixState()
         other.needed = self.needed
         other.in_integer = self.in_integer
+        other.digits = self.digits
         other.started = self.started
         return other
 
@@ -199,6 +218,7 @@ class PrefixState:
         if token in DIGITS:
             if not state.in_integer:
                 raise ValueError("digit outside an integer")
+            state.digits += 1
             return state          # digits extend the current integer
 
         if state.in_integer:
@@ -213,11 +233,14 @@ class PrefixState:
             # the ``in_integer`` branch above (and in is_complete/legal, which
             # both look one step ahead).
             state.in_integer = True
+            state.digits = 0
         else:
             state.needed -= 1     # a symbol is a complete operand
         return state
 
     def is_complete(self) -> bool:
+        if self.in_integer and self.digits == 0:
+            return False          # an INT marker with no digits is unfinished
         needed = self.needed - 1 if self.in_integer else self.needed
         return self.started and needed == 0
 

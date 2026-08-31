@@ -85,7 +85,7 @@ def run_epoch(model, loader, optimizer, scheduler, criterion, device, tcfg,
 
 @torch.no_grad()
 def evaluate_split(model, loader, dataset, vocab, tcfg, device, max_len,
-                   constraint=None):
+                   constraint=None, beam_width=None):
     """Free-running decode over a split, scored with the full metric suite."""
     model.eval()
     predictions, references, templates = [], [], []
@@ -94,7 +94,8 @@ def evaluate_split(model, loader, dataset, vocab, tcfg, device, max_len,
         batch_on_device = {k: (v.to(device) if torch.is_tensor(v) else v)
                            for k, v in batch.items()}
         decoded = beam_search(model, batch_on_device, vocab,
-                              beam_width=tcfg.beam_width, max_len=max_len,
+                              beam_width=beam_width or tcfg.beam_width,
+                              max_len=max_len,
                               length_penalty=tcfg.length_penalty,
                               constrained=tcfg.constrained_decoding,
                               constraint=constraint)
@@ -147,7 +148,8 @@ def train_model(model, bundle, cfg, device, run_name="run", log=print):
         if due:
             val_metrics, _ = evaluate_split(
                 model, loaders["val"], bundle.datasets["val"], vocab, tcfg,
-                device, max_len, constraint)
+                device, max_len, constraint,
+                beam_width=tcfg.select_beam_width)
             score = val_metrics["symbolic_exact_match"]["value"]
             entry["val_symbolic_em"] = score
             entry["val_raw_em"] = val_metrics["raw_exact_match"]["value"]

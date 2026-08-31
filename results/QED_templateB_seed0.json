@@ -1,0 +1,913 @@
+{
+  "theory": "QED",
+  "protocol": "template",
+  "device": "cpu",
+  "arms": {
+    "full_vanilla_dense": {
+      "0": {
+        "config": {
+          "name": "QED_template",
+          "data": {
+            "root": "data/Symba",
+            "theory": "QED",
+            "split_protocol": "template",
+            "val_frac": 0.15,
+            "test_frac": 0.3,
+            "target": "canonical",
+            "amp_representation": "ast",
+            "allow_parse_failures": false
+          },
+          "model": {
+            "d_model": 128,
+            "num_heads": 4,
+            "graph_layers": 2,
+            "math_layers": 2,
+            "dec_layers": 2,
+            "dim_feedforward": 512,
+            "dropout": 0.1,
+            "attn_dropout": 0.1,
+            "attention": "vanilla",
+            "ffn": "dense",
+            "n_experts": 4,
+            "top_k": 2,
+            "moe_aux_weight": 0.01,
+            "embedding": "plain",
+            "use_type_embedding": true,
+            "tie_embeddings": true,
+            "tokenizer": "vocab",
+            "gbst_block_sizes": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "gbst_downsample": 2,
+            "use_graph": true,
+            "use_math": true,
+            "gated_fusion": false,
+            "max_seq_len": 0
+          },
+          "train": {
+            "lr": 0.0003,
+            "weight_decay": 0.01,
+            "warmup_frac": 0.1,
+            "label_smoothing": 0.0,
+            "grad_clip": 1.0,
+            "batch_size": 16,
+            "num_epochs": 30,
+            "patience": 12,
+            "seed": 0,
+            "select_on": "val_symbolic_em",
+            "eval_every": 4,
+            "beam_width": 4,
+            "length_penalty": 0.7,
+            "constrained_decoding": true,
+            "device": "auto"
+          },
+          "out_dir": "results"
+        },
+        "n_parameters": 1398272,
+        "train": {
+          "history": [
+            {
+              "epoch": 1,
+              "train_loss": 4.478480559128982,
+              "train_aux": 0.0,
+              "val_loss": 3.5809261004130044,
+              "lr": 0.00010769230769230768,
+              "seconds": 14.9
+            },
+            {
+              "epoch": 2,
+              "train_loss": 3.1538486664111796,
+              "train_aux": 0.0,
+              "val_loss": 2.692357897758484,
+              "lr": 0.00020769230769230766,
+              "seconds": 14.7
+            },
+            {
+              "epoch": 3,
+              "train_loss": 2.472603119336642,
+              "train_aux": 0.0,
+              "val_loss": 1.9882020354270935,
+              "lr": 0.0003,
+              "seconds": 14.2
+            },
+            {
+              "epoch": 4,
+              "train_loss": 1.7801489004722009,
+              "train_aux": 0.0,
+              "val_loss": 1.4211110472679138,
+              "lr": 0.00029898575366129145,
+              "seconds": 14.2,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 0.9876543209876543,
+              "selected": true
+            },
+            {
+              "epoch": 5,
+              "train_loss": 1.353317691729619,
+              "train_aux": 0.0,
+              "val_loss": 1.1415143410364788,
+              "lr": 0.00029595673058697357,
+              "seconds": 11.2
+            },
+            {
+              "epoch": 6,
+              "train_loss": 1.0945235857596765,
+              "train_aux": 0.0,
+              "val_loss": 0.950668603181839,
+              "lr": 0.0002909538931178862,
+              "seconds": 11.1
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.9106981616753799,
+              "train_aux": 0.0,
+              "val_loss": 0.8116745750109354,
+              "lr": 0.0002840448960485118,
+              "seconds": 11.1
+            },
+            {
+              "epoch": 8,
+              "train_loss": 0.8008412970946386,
+              "train_aux": 0.0,
+              "val_loss": 0.741337850689888,
+              "lr": 0.00027532317171194046,
+              "seconds": 11.8,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            },
+            {
+              "epoch": 9,
+              "train_loss": 0.7048995036345261,
+              "train_aux": 0.0,
+              "val_loss": 0.6688784013191859,
+              "lr": 0.00026490666646784665,
+              "seconds": 10.8
+            },
+            {
+              "epoch": 10,
+              "train_loss": 0.6226706504821777,
+              "train_aux": 0.0,
+              "val_loss": 0.6267539461453756,
+              "lr": 0.00025293624568031,
+              "seconds": 10.8
+            },
+            {
+              "epoch": 11,
+              "train_loss": 0.5726876098376054,
+              "train_aux": 0.0,
+              "val_loss": 0.612731138865153,
+              "lr": 0.00023957378875541792,
+              "seconds": 10.2
+            },
+            {
+              "epoch": 12,
+              "train_loss": 0.5153205646918371,
+              "train_aux": 0.0,
+              "val_loss": 0.5898487816254298,
+              "lr": 0.000225,
+              "seconds": 10.6,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            },
+            {
+              "epoch": 13,
+              "train_loss": 0.48102377125850093,
+              "train_aux": 0.0,
+              "val_loss": 0.5768308192491531,
+              "lr": 0.0002094119649058735,
+              "seconds": 10.4
+            },
+            {
+              "epoch": 14,
+              "train_loss": 0.4339764221356465,
+              "train_aux": 0.0,
+              "val_loss": 0.5542512585719427,
+              "lr": 0.00019302048490666353,
+              "seconds": 10.6
+            },
+            {
+              "epoch": 15,
+              "train_loss": 0.4171187155521833,
+              "train_aux": 0.0,
+              "val_loss": 0.5409018596013387,
+              "lr": 0.00017604722665003956,
+              "seconds": 10.6
+            },
+            {
+              "epoch": 16,
+              "train_loss": 0.38053843952142274,
+              "train_aux": 0.0,
+              "val_loss": 0.5271920611461004,
+              "lr": 0.00015872172433657134,
+              "seconds": 12.3,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            }
+          ],
+          "best_epoch": 4,
+          "best_val_symbolic_em": 0.0
+        },
+        "test": {
+          "raw_exact_match": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "symbolic_exact_match": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "parse_validity": {
+            "value": 0.9880952380952381,
+            "ci_low": 0.9356030079821146,
+            "ci_high": 0.9978954710984119,
+            "n": 84,
+            "successes": 83
+          },
+          "mass_dimension_validity": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "channel_accuracy": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "coefficient_exact": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "monomial_f1": {
+            "value": 0.0,
+            "n": 84
+          },
+          "complexity_bailouts": 0,
+          "per_template": {
+            "Mul(Pow(Add(Mul(Integer(81), Pow": {
+              "value": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.1758845505823749,
+              "n": 18,
+              "successes": 0
+            },
+            "Mul(Pow(Add(Pow(Symbol('reg_prop": {
+              "value": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.1758845505823749,
+              "n": 18,
+              "successes": 0
+            }
+          },
+          "macro_template_accuracy": {
+            "value": 0.0,
+            "n_classes": 8
+          }
+        },
+        "moe_stats": [],
+        "minutes": 10.95,
+        "example_predictions": [
+          "/ + * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 ^ e INT+ 4 * INT+ 2 + reg_prop reg_prop",
+          "/ + * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 + * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 ^ e INT+ 4 * INT+ 2 2 s_13 s_34",
+          "/ + * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 + * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 ^ e INT+ 4 * INT+ 2 2 s_13 s_34"
+        ]
+      }
+    },
+    "math_only": {
+      "0": {
+        "config": {
+          "name": "QED_template",
+          "data": {
+            "root": "data/Symba",
+            "theory": "QED",
+            "split_protocol": "template",
+            "val_frac": 0.15,
+            "test_frac": 0.3,
+            "target": "canonical",
+            "amp_representation": "ast",
+            "allow_parse_failures": false
+          },
+          "model": {
+            "d_model": 128,
+            "num_heads": 4,
+            "graph_layers": 2,
+            "math_layers": 2,
+            "dec_layers": 2,
+            "dim_feedforward": 512,
+            "dropout": 0.1,
+            "attn_dropout": 0.1,
+            "attention": "vanilla",
+            "ffn": "dense",
+            "n_experts": 4,
+            "top_k": 2,
+            "moe_aux_weight": 0.01,
+            "embedding": "plain",
+            "use_type_embedding": true,
+            "tie_embeddings": true,
+            "tokenizer": "vocab",
+            "gbst_block_sizes": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "gbst_downsample": 2,
+            "use_graph": false,
+            "use_math": true,
+            "gated_fusion": false,
+            "max_seq_len": 0
+          },
+          "train": {
+            "lr": 0.0003,
+            "weight_decay": 0.01,
+            "warmup_frac": 0.1,
+            "label_smoothing": 0.0,
+            "grad_clip": 1.0,
+            "batch_size": 16,
+            "num_epochs": 30,
+            "patience": 12,
+            "seed": 0,
+            "select_on": "val_symbolic_em",
+            "eval_every": 4,
+            "beam_width": 4,
+            "length_penalty": 0.7,
+            "constrained_decoding": true,
+            "device": "auto"
+          },
+          "out_dir": "results"
+        },
+        "n_parameters": 991360,
+        "train": {
+          "history": [
+            {
+              "epoch": 1,
+              "train_loss": 4.597919427431547,
+              "train_aux": 0.0,
+              "val_loss": 3.7190040349960327,
+              "lr": 0.00010769230769230768,
+              "seconds": 9.3
+            },
+            {
+              "epoch": 2,
+              "train_loss": 3.2838142468379092,
+              "train_aux": 0.0,
+              "val_loss": 2.7918632427851358,
+              "lr": 0.00020769230769230766,
+              "seconds": 10.4
+            },
+            {
+              "epoch": 3,
+              "train_loss": 2.603045078424307,
+              "train_aux": 0.0,
+              "val_loss": 2.142427921295166,
+              "lr": 0.0003,
+              "seconds": 10.9
+            },
+            {
+              "epoch": 4,
+              "train_loss": 1.8802282168315008,
+              "train_aux": 0.0,
+              "val_loss": 1.5281702478726704,
+              "lr": 0.00029898575366129145,
+              "seconds": 10.5,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 0.41975308641975306,
+              "selected": true
+            },
+            {
+              "epoch": 5,
+              "train_loss": 1.4032505200459406,
+              "train_aux": 0.0,
+              "val_loss": 1.1288030842940013,
+              "lr": 0.00029595673058697357,
+              "seconds": 10.8
+            },
+            {
+              "epoch": 6,
+              "train_loss": 1.1389306554427514,
+              "train_aux": 0.0,
+              "val_loss": 0.9106047252813975,
+              "lr": 0.0002909538931178862,
+              "seconds": 10.1
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.924786205475147,
+              "train_aux": 0.0,
+              "val_loss": 0.7778489291667938,
+              "lr": 0.0002840448960485118,
+              "seconds": 9.6
+            },
+            {
+              "epoch": 8,
+              "train_loss": 0.8058285346397986,
+              "train_aux": 0.0,
+              "val_loss": 0.6962473839521408,
+              "lr": 0.00027532317171194046,
+              "seconds": 10.0,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            },
+            {
+              "epoch": 9,
+              "train_loss": 0.7173116688544934,
+              "train_aux": 0.0,
+              "val_loss": 0.6669696519772211,
+              "lr": 0.00026490666646784665,
+              "seconds": 12.7
+            },
+            {
+              "epoch": 10,
+              "train_loss": 0.6355327069759369,
+              "train_aux": 0.0,
+              "val_loss": 0.626705269018809,
+              "lr": 0.00025293624568031,
+              "seconds": 11.9
+            },
+            {
+              "epoch": 11,
+              "train_loss": 0.5845142602920532,
+              "train_aux": 0.0,
+              "val_loss": 0.595445861419042,
+              "lr": 0.00023957378875541792,
+              "seconds": 12.5
+            },
+            {
+              "epoch": 12,
+              "train_loss": 0.5387788942226996,
+              "train_aux": 0.0,
+              "val_loss": 0.5771283209323883,
+              "lr": 0.000225,
+              "seconds": 12.2,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            },
+            {
+              "epoch": 13,
+              "train_loss": 0.4905019448353694,
+              "train_aux": 0.0,
+              "val_loss": 0.5625502020120621,
+              "lr": 0.0002094119649058735,
+              "seconds": 12.4
+            },
+            {
+              "epoch": 14,
+              "train_loss": 0.4580997136922983,
+              "train_aux": 0.0,
+              "val_loss": 0.5426174948612849,
+              "lr": 0.00019302048490666353,
+              "seconds": 12.4
+            },
+            {
+              "epoch": 15,
+              "train_loss": 0.43902707443787503,
+              "train_aux": 0.0,
+              "val_loss": 0.5366876721382141,
+              "lr": 0.00017604722665003956,
+              "seconds": 12.0
+            },
+            {
+              "epoch": 16,
+              "train_loss": 0.4148173446838672,
+              "train_aux": 0.0,
+              "val_loss": 0.5322387516498566,
+              "lr": 0.00015872172433657134,
+              "seconds": 14.4,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            }
+          ],
+          "best_epoch": 4,
+          "best_val_symbolic_em": 0.0
+        },
+        "test": {
+          "raw_exact_match": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "symbolic_exact_match": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "parse_validity": {
+            "value": 0.2261904761904762,
+            "ci_low": 0.14985904898307534,
+            "ci_high": 0.32647107250833646,
+            "n": 84,
+            "successes": 19
+          },
+          "mass_dimension_validity": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "channel_accuracy": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "coefficient_exact": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.043733265332143306,
+            "n": 84,
+            "successes": 0
+          },
+          "monomial_f1": {
+            "value": 0.0,
+            "n": 84
+          },
+          "complexity_bailouts": 0,
+          "per_template": {
+            "Mul(Pow(Add(Mul(Integer(81), Pow": {
+              "value": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.1758845505823749,
+              "n": 18,
+              "successes": 0
+            },
+            "Mul(Pow(Add(Pow(Symbol('reg_prop": {
+              "value": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.1758845505823749,
+              "n": 18,
+              "successes": 0
+            }
+          },
+          "macro_template_accuracy": {
+            "value": 0.0,
+            "n_classes": 8
+          }
+        },
+        "moe_stats": [],
+        "minutes": 11.04,
+        "example_predictions": [
+          "/ / / * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * INT+ 4 * INT+ 4 * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * m_e m_e m_e m_e m_e",
+          "/ / / * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * INT+ 4 * INT+ 4 * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * m_e m_e m_e m_e m_e",
+          "/ + * INT+ 1 ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * INT+ 4 * INT+ 4 * INT+ 4 * ^ e INT+ 4 * INT+ 4 * ^ e INT+ 4 * INT+ 2 2 2 2 2"
+        ]
+      }
+    }
+  },
+  "baselines": {
+    "0": {
+      "most_frequent": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.9562667346678565,
+          "ci_high": 0.9999999999999999,
+          "n": 84,
+          "successes": 84
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.9562667346678565,
+          "ci_high": 0.9999999999999999,
+          "n": 84,
+          "successes": 84
+        },
+        "channel_accuracy": {
+          "value": 0.2857142857142857,
+          "ci_low": 0.20014898610655452,
+          "ci_high": 0.3900224133215068,
+          "n": 84,
+          "successes": 24
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.23333333333333334,
+          "n": 84
+        },
+        "complexity_bailouts": 0,
+        "per_template": {
+          "Mul(Pow(Add(Mul(Integer(81), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.1758845505823749,
+            "n": 18,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Pow(Symbol('reg_prop": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.1758845505823749,
+            "n": 18,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 8
+        }
+      },
+      "exact_lookup": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.9562667346678565,
+          "ci_high": 0.9999999999999999,
+          "n": 84,
+          "successes": 84
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.9562667346678565,
+          "ci_high": 0.9999999999999999,
+          "n": 84,
+          "successes": 84
+        },
+        "channel_accuracy": {
+          "value": 0.2857142857142857,
+          "ci_low": 0.20014898610655452,
+          "ci_high": 0.3900224133215068,
+          "n": 84,
+          "successes": 24
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.23333333333333334,
+          "n": 84
+        },
+        "complexity_bailouts": 0,
+        "per_template": {
+          "Mul(Pow(Add(Mul(Integer(81), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.1758845505823749,
+            "n": 18,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Pow(Symbol('reg_prop": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.1758845505823749,
+            "n": 18,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 8
+        }
+      },
+      "nearest_neighbour": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.9562667346678565,
+          "ci_high": 0.9999999999999999,
+          "n": 84,
+          "successes": 84
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.9562667346678565,
+          "ci_high": 0.9999999999999999,
+          "n": 84,
+          "successes": 84
+        },
+        "channel_accuracy": {
+          "value": 0.09523809523809523,
+          "ci_low": 0.049051123189484375,
+          "ci_high": 0.17682818684129828,
+          "n": 84,
+          "successes": 8
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.6285714285714287,
+          "n": 84
+        },
+        "complexity_bailouts": 0,
+        "per_template": {
+          "Mul(Pow(Add(Mul(Integer(81), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.1758845505823749,
+            "n": 18,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Pow(Symbol('reg_prop": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.1758845505823749,
+            "n": 18,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 8
+        }
+      },
+      "template_oracle": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.9562667346678565,
+          "ci_high": 0.9999999999999999,
+          "n": 84,
+          "successes": 84
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.9562667346678565,
+          "ci_high": 0.9999999999999999,
+          "n": 84,
+          "successes": 84
+        },
+        "channel_accuracy": {
+          "value": 0.2857142857142857,
+          "ci_low": 0.20014898610655452,
+          "ci_high": 0.3900224133215068,
+          "n": 84,
+          "successes": 24
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.043733265332143306,
+          "n": 84,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.23333333333333334,
+          "n": 84
+        },
+        "complexity_bailouts": 0,
+        "per_template": {
+          "Mul(Pow(Add(Mul(Integer(81), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.1758845505823749,
+            "n": 18,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Pow(Symbol('reg_prop": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.1758845505823749,
+            "n": 18,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 8
+        }
+      }
+    }
+  },
+  "started": "2026-08-31 09:29:08",
+  "data": {
+    "theory": "QED",
+    "n_records": 360,
+    "n_templates": 30,
+    "split": {
+      "train": 195,
+      "val": 81,
+      "test": 84
+    },
+    "vocab": {
+      "graph": 27,
+      "amp": 65,
+      "target": 37
+    },
+    "max_lengths": {
+      "graph": 34,
+      "amp": 264,
+      "target": 105
+    },
+    "oov": {
+      "val.graph_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "val.amp_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "val.target_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.graph_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.amp_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.target_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      }
+    },
+    "build_seconds": 55.5
+  }
+}

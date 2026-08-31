@@ -12,7 +12,8 @@ from collections import defaultdict
 import sympy
 
 from ..data.canonical import check_mass_dimension
-from ..data.serialize import from_prefix
+from ..data.serialize import (from_prefix, is_well_formed,
+                              operator_count)
 
 
 def wilson(successes: int, n: int, z: float = 1.96):
@@ -43,6 +44,9 @@ _FRACTION_CACHE = {}
 # an order of magnitude past that cannot be equal to one, so it is scored wrong
 # without being expanded. Bail-outs are counted and reported rather than hidden.
 COMPLEXITY_CAP = 600
+# A prediction with more than this multiple of the reference's operator count
+# is scored wrong without being parsed.
+OPERATOR_SLACK = 3
 _bailouts = {"count": 0}
 
 
@@ -160,8 +164,19 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
         raw_match = pred == ref
         raw_em.append(raw_match)
 
-        pred_expr = _safe_expr(pred)
-        well_formed.append(pred_expr is not None)
+        # Well-formedness is decided syntactically, with no sympy involved.
+        well_formed.append(is_well_formed(pred))
+
+        # Only build a sympy object for a prediction that could plausibly equal
+        # the reference. A sequence several times more complex than the target
+        # cannot be equal to it, and parsing it is where the time goes.
+        budget = OPERATOR_SLACK * max(1, operator_count(ref))
+        if not well_formed[-1] or operator_count(pred) > budget:
+            if well_formed[-1]:
+                _bailouts["count"] += 1
+            pred_expr = None
+        else:
+            pred_expr = _safe_expr(pred)
 
         ref_expr = _safe_expr(ref)
         if pred_expr is None or ref_expr is None:
