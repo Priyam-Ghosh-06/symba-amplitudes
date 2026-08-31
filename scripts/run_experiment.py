@@ -24,7 +24,7 @@ from symba.config import Config
 from symba.data.pipeline import build
 from symba.eval.baselines import run_all as run_baselines
 from symba.eval.decode import ConstraintMask
-from symba.eval.metrics import format_report
+from symba.eval.metrics import clear_caches, format_report
 from symba.model.model import AmplitudeModel
 from symba.train.loop import evaluate_split, train_model
 
@@ -125,6 +125,9 @@ def main():
             results["baselines"][str(seed)] = scored
             for name, metrics in scored.items():
                 print(format_report(f"seed {seed} / {name}", metrics))
+        # Baselines score four prediction sets per seed and leave sympy's cache
+        # holding all of it for the rest of the run. Release it before training.
+        clear_caches()
         flush()
 
     total = len(args.arms) * len(args.seeds)
