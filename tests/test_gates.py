@@ -380,6 +380,51 @@ def test_constrained_decoding_only_emits_parseable_sequences():
         f"only {parseable}/{len(decoded)} constrained outputs parse")
 
 
+def test_kv_cache_matches_full_recompute():
+    """Incremental decoding must be an optimisation, not a change of model.
+
+    The cache has to travel with the beam when hypotheses are reordered, and
+    the positional embedding has to see the true index, or the speedup is
+    silently a different model.
+    """
+    cfg, b = bundle()
+    batch = next(iter(b.loaders["val"]))
+
+    for kind in ("vanilla", "xsa_proj", "xsa_mask"):
+        torch.manual_seed(0)
+        model = AmplitudeModel(
+            cfg.model.__class__(**{**vars(cfg.model), "attention": kind}),
+            b.graph_vocab, b.amp_vocab, b.target_vocab, b.lengths).eval()
+
+        with torch.no_grad():
+            memory, mask, _ = model.encode(batch)
+            seq = batch["target"][:, :12]
+            full, _ = model.decode_step(seq, memory, mask)
+
+            cache, stepwise = model.new_cache(), None
+            for t in range(seq.size(1)):
+                stepwise, _ = model.decode_step(seq[:, t:t + 1], memory, mask,
+                                                cache=cache, offset=t)
+
+        diff = (full[:, -1] - stepwise[:, -1]).abs().max().item()
+        assert diff < 1e-4, f"{kind}: cached logits differ by {diff:.2e}"
+
+
+def test_beam_search_is_identical_with_and_without_cache():
+    cfg, b = bundle()
+    torch.manual_seed(0)
+    model = AmplitudeModel(cfg.model, b.graph_vocab, b.amp_vocab,
+                           b.target_vocab, b.lengths).eval()
+    batch = next(iter(b.loaders["val"]))
+    constraint = ConstraintMask(b.target_vocab)
+
+    kwargs = dict(beam_width=4, max_len=60, constrained=True,
+                  constraint=constraint)
+    cached = beam_search(model, batch, b.target_vocab, use_cache=True, **kwargs)
+    plain = beam_search(model, batch, b.target_vocab, use_cache=False, **kwargs)
+    assert cached == plain
+
+
 def test_prefix_state_tracks_operand_debt():
     state = PrefixState()
     for token in ["+", "m_e"]:

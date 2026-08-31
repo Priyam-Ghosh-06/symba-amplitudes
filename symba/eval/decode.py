@@ -90,7 +90,8 @@ def _advance(state, token, digits_in_run):
 
 @torch.no_grad()
 def beam_search(model, batch, vocab, beam_width=4, max_len=160,
-                length_penalty=0.7, constrained=True, constraint=None):
+                length_penalty=0.7, constrained=True, constraint=None,
+                use_cache=True):
     """Batched beam search. Returns a list of token-id lists, one per sample.
 
     Beams live in the batch dimension, so one decoder call advances every beam
@@ -117,8 +118,20 @@ def beam_search(model, batch, vocab, beam_width=4, max_len=160,
     states = [PrefixState() for _ in range(B * W)]
     digit_runs = [0] * (B * W)
 
+    # Incremental decoding: each step feeds only the newest token and reuses the
+    # cached self-attention K/V and the cross-attention projection of the fixed
+    # memory. Re-running the whole prefix every step is O(W*T^2) (02 SS4.2).
+    # ``use_cache=False`` keeps the O(T^2) recompute path, which exists so the
+    # gate test can assert the two produce the same sequences.
+    cache = model.new_cache() if use_cache else None
+
     for step in range(max_len - 1):
-        logits, _ = model.decode_step(sequences, memory, memory_mask)
+        if cache is None:
+            logits, _ = model.decode_step(sequences, memory, memory_mask)
+        else:
+            logits, _ = model.decode_step(
+                sequences[:, -1:], memory, memory_mask,
+                cache=cache, offset=sequences.size(1) - 1)
         log_probs = F.log_softmax(logits[:, -1, :], dim=-1)
 
         if constrained:
@@ -145,6 +158,8 @@ def beam_search(model, batch, vocab, beam_width=4, max_len=160,
         sequences = torch.cat(
             [sequences[global_beam], token_index.reshape(-1, 1)], dim=1)
         scores = top_scores.reshape(-1)
+        if cache is not None:
+            model.reorder_cache(cache, global_beam)
 
         new_states, new_runs, new_finished = [], [], []
         for i, (src, token_id) in enumerate(zip(global_beam.tolist(),

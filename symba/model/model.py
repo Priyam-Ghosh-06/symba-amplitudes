@@ -70,13 +70,19 @@ class DecoderBlock(nn.Module):
         self.dropout = nn.Dropout(cfg.dropout)
 
     def forward(self, x, memory, memory_mask=None, need_weights=False,
-                type_ids=None):
-        attended, _ = self.self_attn(self.norm1(x), causal=True)
+                type_ids=None, cache=None):
+        self_cache = cross_cache = None
+        if cache is not None:
+            self_cache = cache.setdefault("self_attn", {})
+            cross_cache = cache.setdefault("cross_attn", {})
+
+        attended, _ = self.self_attn(self.norm1(x), causal=True,
+                                     cache=self_cache)
         x = x + self.dropout(attended)
 
         crossed, weights = self.cross_attn(
             self.norm2(x), memory=memory, key_padding_mask=memory_mask,
-            need_weights=need_weights)
+            need_weights=need_weights, cache=cross_cache)
         x = x + self.dropout(crossed)
 
         return x + self.ffn(self.norm3(x), type_ids), weights
@@ -168,14 +174,45 @@ class AmplitudeModel(nn.Module):
         graph_len = parts[0].size(1) if self.graph_encoder is not None else 0
         return memory, memory_mask, graph_len
 
-    def decode_step(self, target_in, memory, memory_mask, need_weights=False):
-        x = self.decoder_embed(target_in)
+    def decode_step(self, target_in, memory, memory_mask, need_weights=False,
+                    cache=None, offset=0):
+        """One decoder pass.
+
+        With ``cache`` supplied, ``target_in`` is just the newest token and
+        ``offset`` is its position, so the positional embedding still sees the
+        true index. Without it the whole prefix is re-run, which is what
+        training needs.
+        """
+        x = self.decoder_embed(target_in, offset=offset)
         weights = None
-        for block in self.blocks:
-            x, w = block(x, memory, memory_mask, need_weights)
+        for i, block in enumerate(self.blocks):
+            block_cache = None
+            if cache is not None:
+                block_cache = cache.setdefault(i, {})
+            x, w = block(x, memory, memory_mask, need_weights,
+                         cache=block_cache)
             if w is not None:
                 weights = w
         return self.fc_out(self.norm(x)), weights
+
+    @staticmethod
+    def new_cache() -> dict:
+        """Fresh incremental-decoding state for one generation."""
+        return {}
+
+    @staticmethod
+    def reorder_cache(cache: dict, index: torch.Tensor):
+        """Reindex the batch dimension of every cached tensor.
+
+        Beam search permutes hypotheses at every step. The cached keys and
+        values are per hypothesis, so they have to travel with it - otherwise a
+        surviving beam continues from another beam's history, silently.
+        """
+        for node in cache.values():
+            for attn in node.values():
+                for key, (k, v) in list(attn.items()):
+                    attn[key] = (k.index_select(0, index),
+                                 v.index_select(0, index))
 
     def forward(self, batch, need_weights=False):
         memory, memory_mask, graph_len = self.encode(batch)

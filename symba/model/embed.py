@@ -58,9 +58,10 @@ class TokenEmbedding(nn.Module):
         """The matrix weight tying should target."""
         return self.token_embed
 
-    def forward(self, ids):
+    def forward(self, ids, offset: int = 0):
         B, L = ids.shape
-        positions = torch.arange(L, device=ids.device).unsqueeze(0).expand(B, -1)
+        positions = (torch.arange(L, device=ids.device) + offset
+                     ).unsqueeze(0).expand(B, -1)
 
         filler = self.token_embed(ids)
         if self.type_embed is not None:

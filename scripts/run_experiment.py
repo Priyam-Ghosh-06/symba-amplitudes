@@ -21,6 +21,7 @@ import torch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from symba.config import Config
+from symba.experiment import ARMS
 from symba.data.pipeline import build
 from symba.eval.baselines import run_all as run_baselines
 from symba.eval.decode import ConstraintMask
@@ -28,25 +29,6 @@ from symba.eval.metrics import clear_caches, format_report
 from symba.model.model import AmplitudeModel
 from symba.train.loop import evaluate_split, train_model
 
-# name -> config overrides. Every arm differs from the control in one factor,
-# so a difference is attributable (01 P4).
-ARMS = {
-    "full_vanilla_dense":   {},                                    # control
-    "full_xsa_proj_dense":  {"model.attention": "xsa_proj"},
-    "full_xsa_mask_dense":  {"model.attention": "xsa_mask"},
-    "full_vanilla_moe":     {"model.ffn": "moe"},
-    "graph_only":           {"model.use_math": False},
-    "math_only":            {"model.use_graph": False},
-    "no_type_embedding":    {"model.use_type_embedding": False},
-    "role_filler":          {"model.embedding": "role_filler"},
-    "tpr_binding":          {"model.embedding": "tpr"},
-    "capacity_256":         {"model.d_model": 256,
-                             "model.dim_feedforward": 1024},
-    "capacity_64":          {"model.d_model": 64,
-                             "model.dim_feedforward": 256},
-    "unconstrained_decode": {"train.constrained_decoding": False},
-    "raw_target":           {"data.target": "raw"},
-}
 
 DEFAULT_ARMS = ["full_vanilla_dense", "full_xsa_proj_dense",
                 "full_xsa_mask_dense", "full_vanilla_moe",
