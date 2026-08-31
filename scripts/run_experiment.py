@@ -63,6 +63,11 @@ def parse_args():
     p.add_argument("--seeds", nargs="+", type=int, default=[0])
     p.add_argument("--protocol", default="record",
                    choices=["record", "template"])
+    p.add_argument("--val-frac", type=float, default=0.1)
+    p.add_argument("--test-frac", type=float, default=0.1,
+                   help="under protocol template this is a fraction of the "
+                        "template classes, so raise it or the test split is a "
+                        "handful of records from one or two classes")
     p.add_argument("--epochs", type=int, default=60)
     p.add_argument("--batch-size", type=int, default=None)
     p.add_argument("--patience", type=int, default=12)
@@ -80,6 +85,8 @@ def base_config(args, seed):
         "data.root": args.data,
         "data.theory": args.theory,
         "data.split_protocol": args.protocol,
+        "data.val_frac": args.val_frac,
+        "data.test_frac": args.test_frac,
         "train.num_epochs": args.epochs,
         "train.batch_size": batch,
         "train.patience": args.patience,
