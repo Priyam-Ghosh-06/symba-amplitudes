@@ -380,6 +380,66 @@ def test_constrained_decoding_only_emits_parseable_sequences():
         f"only {parseable}/{len(decoded)} constrained outputs parse")
 
 
+def test_segmentation_preserves_the_amplitude():
+    """Splitting into diagrams must not lose or invent content.
+
+    Every token of the flat prefix has to reappear across the segments, except
+    the ``+`` operators that joined the diagrams, which the split replaces with
+    a single ``<diagrams>`` placeholder in the context segment.
+    """
+    from collections import Counter
+    from symba.data.ast_parse import amp_to_segments
+
+    _cfg, b = bundle("QCD")
+    multi = 0
+    for record in b.records[:40]:
+        flat = Counter(record["amp_tokens"])
+        segments = amp_to_segments(record["amp_std"])
+        seen = Counter(t for s in segments for t in s)
+        n_diagrams = len(segments) - 1
+        multi += n_diagrams > 1
+
+        seen["<diagrams>"] -= 1
+        assert not (seen - flat), "segmentation invented tokens"
+        missing = flat - seen
+        assert sum(missing.values()) <= max(0, n_diagrams), \
+            f"segmentation lost {sum(missing.values())} tokens"
+
+    assert multi > 0, "no QCD amplitude split into diagrams at all"
+
+
+def test_segmentation_is_decided_by_measurement():
+    """The auto setting must pick per corpus, not per hardcoded theory.
+
+    QCD amplitudes are long and gain 10.7x less attention work; QED's are
+    already short, and the rectangular segment padding costs more than it
+    saves. Measured epoch times: QCD 107s -> 42s, QED 13s -> 31s.
+    """
+    from symba.data.pipeline import resolve_segmentation
+
+    _cfg, qed = bundle("QED")
+    _cfg2, qcd = bundle("QCD")
+    assert qcd.segment_amp is True
+    assert qed.segment_amp is False
+
+    assert resolve_segmentation(True, qed.records) is True
+    assert resolve_segmentation(False, qcd.records) is False
+
+
+def test_model_runs_under_both_segmentation_settings():
+    for theory in ("QED", "QCD"):
+        cfg, b = bundle(theory)
+        batch = next(iter(b.loaders["val"]))
+        for segment in (True, False):
+            model = AmplitudeModel(cfg.model, b.graph_vocab, b.amp_vocab,
+                                   b.target_vocab, b.lengths,
+                                   segment_amp=segment).eval()
+            with torch.no_grad():
+                out = model(batch)
+            assert out["logits"].shape[:2] == (batch["target"].size(0),
+                                               batch["target"].size(1) - 1)
+
+
 def test_kv_cache_matches_full_recompute():
     """Incremental decoding must be an optimisation, not a change of model.
 

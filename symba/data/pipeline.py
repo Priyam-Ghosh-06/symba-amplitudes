@@ -54,7 +54,7 @@ def build(cfg: Config, verify_canonical: bool = False, verbose: bool = True):
     for record in records:
         normalize_record(record)
         build_graph_record(record)
-        parse_amp_record(record)
+        parse_amp_record(record, segment=True)
         canonicalise_record(record, verify=verify_canonical)
 
         if cfg.data.target == "canonical":
@@ -69,6 +69,11 @@ def build(cfg: Config, verify_canonical: bool = False, verbose: bool = True):
 
         if cfg.data.amp_representation == "raw":
             record["amp_tokens"] = list(record["amp_std"])
+
+    segment_amp = resolve_segmentation(cfg.data.segment_amp, records)
+    if not segment_amp:
+        for record in records:
+            record["amp_segments"] = [record["amp_tokens"]]
 
     classes = assign_template_classes(records)
 
@@ -113,6 +118,7 @@ def build(cfg: Config, verify_canonical: bool = False, verbose: bool = True):
         "max_lengths": {"graph": lengths[0], "amp": lengths[1],
                         "target": lengths[2]},
         "oov": oov,
+        "segment_amp": segment_amp,
         "build_seconds": round(time.time() - t0, 1),
     }
 
@@ -127,6 +133,30 @@ def build(cfg: Config, verify_canonical: bool = False, verbose: bool = True):
         if worst["rate"] > 0:
             print(f"  OOV up to {worst['rate']:.3%}: {worst['unseen']}")
 
-    return Bundle(records, train, val, test,
-                  (graph_vocab, amp_vocab, target_vocab),
-                  datasets, loaders, lengths, stats)
+    bundle = Bundle(records, train, val, test,
+                    (graph_vocab, amp_vocab, target_vocab),
+                    datasets, loaders, lengths, stats)
+    bundle.segment_amp = segment_amp
+    return bundle
+
+
+def resolve_segmentation(setting, records) -> bool:
+    """Decide whether per-diagram encoding is worth it on this corpus.
+
+    Attention cost goes as length squared, and segments are batched as a
+    rectangle, so the comparison is ``n_diagrams * longest_diagram^2`` against
+    ``full_length^2``. On QCD the first is ~50x smaller; on QED it is slightly
+    larger, which matches the measured epoch times.
+    """
+    if isinstance(setting, bool):
+        return setting
+    if setting != "auto":
+        raise ValueError(f"segment_amp must be True, False or 'auto', "
+                         f"got {setting!r}")
+
+    flat = segmented = 0
+    for record in records:
+        flat += len(record["amp_tokens"]) ** 2
+        segments = record["amp_segments"]
+        segmented += len(segments) * max(len(s) for s in segments) ** 2
+    return segmented < flat

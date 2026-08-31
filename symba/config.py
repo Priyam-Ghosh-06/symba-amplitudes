@@ -32,6 +32,17 @@ class DataConfig:
     test_frac: float = 0.1
     target: str = "canonical"           # canonical | raw
     amp_representation: str = "ast"     # ast | raw
+    # Encode each Feynman diagram of the amplitude separately with shared
+    # weights instead of as one flat stream (01 SS4.2).
+    #
+    # "auto" measures whether it pays on this corpus and decides. It does not
+    # always: segments are batched as a rectangle (n_diagrams x longest
+    # diagram), so a theory whose amplitudes are already short loses more to
+    # that padding than it saves on attention. Measured, per training epoch:
+    #   QCD  107s flat -> 42s segmented
+    #   QED   13s flat -> 31s segmented
+    # True | False force it, for the ablation arm.
+    segment_amp: str = "auto"
     # A parse failure is a build failure (01 P2). Only flip this to inspect a
     # broken corpus; it is asserted off in the gate tests.
     allow_parse_failures: bool = False

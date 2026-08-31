@@ -1,0 +1,418 @@
+{
+  "theory": "QCD",
+  "protocol": "record",
+  "device": "cpu",
+  "arms": {},
+  "baselines": {
+    "0": {
+      "most_frequent": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.21531701192718142,
+          "n": 14,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.21531701192718142,
+          "n": 14,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.7846829880728186,
+          "ci_high": 1.0,
+          "n": 14,
+          "successes": 14
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.7846829880728186,
+          "ci_high": 1.0,
+          "n": 14,
+          "successes": 14
+        },
+        "channel_accuracy": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.21531701192718142,
+          "n": 14,
+          "successes": 0
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.21531701192718142,
+          "n": 14,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.09340659340659341,
+          "n": 14
+        },
+        "complexity_bailouts": 0,
+        "per_template": {
+          "Mul(Add(Mul(Integer(32), Pow(Sym": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.43449149475208104,
+            "n": 5,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(27), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(3), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(4), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.6576280471103807,
+            "n": 2,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(9), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 6
+        }
+      },
+      "exact_lookup": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.21531701192718142,
+          "n": 14,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.21531701192718142,
+          "n": 14,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.7846829880728186,
+          "ci_high": 1.0,
+          "n": 14,
+          "successes": 14
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.7846829880728186,
+          "ci_high": 1.0,
+          "n": 14,
+          "successes": 14
+        },
+        "channel_accuracy": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.21531701192718142,
+          "n": 14,
+          "successes": 0
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.21531701192718142,
+          "n": 14,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.09340659340659341,
+          "n": 14
+        },
+        "complexity_bailouts": 0,
+        "per_template": {
+          "Mul(Add(Mul(Integer(32), Pow(Sym": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.43449149475208104,
+            "n": 5,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(27), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(3), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(4), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.6576280471103807,
+            "n": 2,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(9), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 6
+        }
+      },
+      "nearest_neighbour": {
+        "raw_exact_match": {
+          "value": 0.14285714285714285,
+          "ci_low": 0.040093073737921175,
+          "ci_high": 0.39941907763863693,
+          "n": 14,
+          "successes": 2
+        },
+        "symbolic_exact_match": {
+          "value": 0.14285714285714285,
+          "ci_low": 0.040093073737921175,
+          "ci_high": 0.39941907763863693,
+          "n": 14,
+          "successes": 2
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.7846829880728186,
+          "ci_high": 1.0,
+          "n": 14,
+          "successes": 14
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.7846829880728186,
+          "ci_high": 1.0,
+          "n": 14,
+          "successes": 14
+        },
+        "channel_accuracy": {
+          "value": 0.42857142857142855,
+          "ci_low": 0.21380509930400526,
+          "ci_high": 0.6740973309713064,
+          "n": 14,
+          "successes": 6
+        },
+        "coefficient_exact": {
+          "value": 0.14285714285714285,
+          "ci_low": 0.040093073737921175,
+          "ci_high": 0.39941907763863693,
+          "n": 14,
+          "successes": 2
+        },
+        "monomial_f1": {
+          "value": 0.6285714285714287,
+          "n": 14
+        },
+        "complexity_bailouts": 0,
+        "per_template": {
+          "Mul(Add(Mul(Integer(32), Pow(Sym": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.43449149475208104,
+            "n": 5,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(27), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(3), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(4), Pow(": {
+            "value": 0.5,
+            "ci_low": 0.09452865480086614,
+            "ci_high": 0.9054713451991339,
+            "n": 2,
+            "successes": 1
+          },
+          "Mul(Pow(Add(Mul(Integer(9), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.125,
+          "n_classes": 6
+        }
+      },
+      "template_oracle": {
+        "raw_exact_match": {
+          "value": 0.5,
+          "ci_low": 0.2679886791947528,
+          "ci_high": 0.7320113208052472,
+          "n": 14,
+          "successes": 7
+        },
+        "symbolic_exact_match": {
+          "value": 0.5,
+          "ci_low": 0.2679886791947528,
+          "ci_high": 0.7320113208052472,
+          "n": 14,
+          "successes": 7
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.7846829880728186,
+          "ci_high": 1.0,
+          "n": 14,
+          "successes": 14
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.7846829880728186,
+          "ci_high": 1.0,
+          "n": 14,
+          "successes": 14
+        },
+        "channel_accuracy": {
+          "value": 0.7142857142857143,
+          "ci_low": 0.4535045882751561,
+          "ci_high": 0.882788120898909,
+          "n": 14,
+          "successes": 10
+        },
+        "coefficient_exact": {
+          "value": 0.5,
+          "ci_low": 0.2679886791947528,
+          "ci_high": 0.7320113208052472,
+          "n": 14,
+          "successes": 7
+        },
+        "monomial_f1": {
+          "value": 0.7000000000000001,
+          "n": 14
+        },
+        "complexity_bailouts": 0,
+        "per_template": {
+          "Mul(Add(Mul(Integer(32), Pow(Sym": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.43449149475208104,
+            "n": 5,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(27), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(3), Pow(": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.7934567085261071,
+            "n": 1,
+            "successes": 0
+          },
+          "Mul(Pow(Add(Mul(Integer(4), Pow(": {
+            "value": 1.0,
+            "ci_low": 0.34237195288961925,
+            "ci_high": 1.0,
+            "n": 2,
+            "successes": 2
+          },
+          "Mul(Pow(Add(Mul(Integer(9), Pow(": {
+            "value": 1.0,
+            "ci_low": 0.20654329147389294,
+            "ci_high": 1.0,
+            "n": 1,
+            "successes": 1
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.5,
+          "n_classes": 6
+        }
+      }
+    }
+  },
+  "started": "2026-08-31 14:19:52",
+  "data": {
+    "theory": "QCD",
+    "n_records": 234,
+    "n_templates": 11,
+    "split": {
+      "train": 191,
+      "val": 29,
+      "test": 14
+    },
+    "vocab": {
+      "graph": 24,
+      "amp": 176,
+      "target": 34
+    },
+    "max_lengths": {
+      "graph": 34,
+      "amp": 2861,
+      "target": 136
+    },
+    "oov": {
+      "val.graph_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "val.amp_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "val.target_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.graph_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.amp_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.target_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      }
+    },
+    "build_seconds": 73.7
+  }
+}

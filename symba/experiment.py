@@ -43,6 +43,7 @@ ARMS = {
                              "model.dim_feedforward": 256},
     "unconstrained_decode": {"train.constrained_decoding": False},
     "raw_target":           {"data.target": "raw"},
+    "no_segmentation":      {"data.segment_amp": False},
 }
 
 
@@ -94,7 +95,7 @@ class BundleCache:
     def get(self, cfg: Config, verbose: bool = True):
         key = (cfg.data.theory, cfg.data.split_protocol, cfg.data.val_frac,
                cfg.data.test_frac, cfg.data.target, cfg.data.amp_representation,
-               cfg.train.seed, cfg.train.batch_size)
+               cfg.data.segment_amp, cfg.train.seed, cfg.train.batch_size)
         if key not in self._store:
             if len(self._store) >= self.limit:
                 self._store.pop(next(iter(self._store)))
@@ -115,7 +116,8 @@ def run_arm(arm: str, seed: int, job: Job, bundles: BundleCache,
 
         model = AmplitudeModel(run_cfg.model, bundle.graph_vocab,
                                bundle.amp_vocab, bundle.target_vocab,
-                               bundle.lengths)
+                               bundle.lengths,
+                               segment_amp=bundle.segment_amp)
         trained = train_model(model, bundle, run_cfg, device,
                               run_name=run_name, log=log)
 
