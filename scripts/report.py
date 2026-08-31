@@ -85,20 +85,91 @@ def report_file(path, markdown=False):
     return "\n".join(lines)
 
 
+def _md_cell(metric):
+    if metric is None:
+        return "-"
+    value = metric["value"] * 100
+    if "ci_low" in metric and metric.get("n"):
+        return (f"{value:.1f} <sub>[{metric['ci_low'] * 100:.0f},"
+                f"{metric['ci_high'] * 100:.0f}]</sub>")
+    return f"{value:.1f}"
+
+
+def markdown_file(path):
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+
+    stats = data.get("data", {})
+    split = stats.get("split", {})
+    lines = [f"### {data.get('theory')} — protocol {data.get('protocol')}", ""]
+    if stats:
+        lines.append(
+            f"{stats.get('n_records')} records, {stats.get('n_templates')} "
+            f"template classes | train/val/test "
+            f"{split.get('train')}/{split.get('val')}/{split.get('test')} | "
+            f"target vocab {stats.get('vocab', {}).get('target')} | "
+            f"max target {stats.get('max_lengths', {}).get('target')} tokens")
+        lines.append("")
+
+    header = ("| run | symbolic EM | raw EM | parse ok | dim-4 ok | channel | "
+              "params | min |")
+    lines += [header, "|" + "---|" * 8]
+
+    for _seed, baselines in sorted(data.get("baselines", {}).items()):
+        for name, metrics in baselines.items():
+            lines.append(
+                f"| _{name}_ | {_md_cell(metrics.get('symbolic_exact_match'))} "
+                f"| {_md_cell(metrics.get('raw_exact_match'))} "
+                f"| {_md_cell(metrics.get('parse_validity'))} "
+                f"| {_md_cell(metrics.get('mass_dimension_validity'))} "
+                f"| {_md_cell(metrics.get('channel_accuracy'))} | - | - |")
+        break                       # baselines are per split; one table is enough
+
+    for arm, seeds in data.get("arms", {}).items():
+        for seed, entry in sorted(seeds.items()):
+            if "error" in entry:
+                lines.append(f"| `{arm}` s{seed} | ERROR | | | | | | |")
+                continue
+            test = entry.get("test", {})
+            params = entry.get("n_parameters", 0) / 1e6
+            lines.append(
+                f"| `{arm}` s{seed} "
+                f"| **{_md_cell(test.get('symbolic_exact_match'))}** "
+                f"| {_md_cell(test.get('raw_exact_match'))} "
+                f"| {_md_cell(test.get('parse_validity'))} "
+                f"| {_md_cell(test.get('mass_dimension_validity'))} "
+                f"| {_md_cell(test.get('channel_accuracy'))} "
+                f"| {params:.2f}M | {entry.get('minutes', 0):.0f} |")
+
+    lines.append("")
+    return "\n".join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="+")
     parser.add_argument("--markdown", action="store_true")
+    parser.add_argument("--out", default=None,
+                        help="write markdown here instead of stdout")
     args = parser.parse_args()
 
     paths = []
     for pattern in args.paths:
         paths.extend(sorted(glob.glob(pattern)) or [pattern])
+    paths = [p for p in paths if os.path.exists(p)]
+
+    if args.markdown:
+        blocks = [markdown_file(p) for p in paths]
+        body = "\n".join(blocks)
+        if args.out:
+            with open(args.out, "w", encoding="utf-8") as fh:
+                fh.write(body)
+            print(f"wrote {args.out}")
+        else:
+            print(body)
+        return
 
     for path in paths:
-        if not os.path.exists(path):
-            print(f"missing: {path}")
-            continue
         print(report_file(path, args.markdown))
 
 
