@@ -1,0 +1,579 @@
+{
+  "theory": "QED",
+  "protocol": "template",
+  "device": "cpu",
+  "arms": {
+    "full_vanilla_dense": {
+      "0": {
+        "config": {
+          "name": "QED_template",
+          "data": {
+            "root": "data/Symba",
+            "theory": "QED",
+            "split_protocol": "template",
+            "val_frac": 0.1,
+            "test_frac": 0.1,
+            "target": "canonical",
+            "amp_representation": "ast",
+            "allow_parse_failures": false
+          },
+          "model": {
+            "d_model": 128,
+            "num_heads": 4,
+            "graph_layers": 2,
+            "math_layers": 2,
+            "dec_layers": 2,
+            "dim_feedforward": 512,
+            "dropout": 0.1,
+            "attn_dropout": 0.1,
+            "attention": "vanilla",
+            "ffn": "dense",
+            "n_experts": 4,
+            "top_k": 2,
+            "moe_aux_weight": 0.01,
+            "embedding": "plain",
+            "use_type_embedding": true,
+            "tie_embeddings": true,
+            "tokenizer": "vocab",
+            "gbst_block_sizes": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "gbst_downsample": 2,
+            "use_graph": true,
+            "use_math": true,
+            "gated_fusion": false,
+            "max_seq_len": 0
+          },
+          "train": {
+            "lr": 0.0003,
+            "weight_decay": 0.01,
+            "warmup_frac": 0.1,
+            "label_smoothing": 0.0,
+            "grad_clip": 1.0,
+            "batch_size": 16,
+            "num_epochs": 40,
+            "patience": 12,
+            "seed": 0,
+            "select_on": "val_symbolic_em",
+            "eval_every": 3,
+            "beam_width": 4,
+            "length_penalty": 0.7,
+            "constrained_decoding": true,
+            "device": "auto"
+          },
+          "out_dir": "results"
+        },
+        "n_parameters": 1398272,
+        "train": {
+          "history": [
+            {
+              "epoch": 1,
+              "train_loss": 4.395396175838652,
+              "train_aux": 0.0,
+              "val_loss": 3.4908868074417114,
+              "lr": 7.857142857142857e-05,
+              "seconds": 15.8
+            },
+            {
+              "epoch": 2,
+              "train_loss": 2.987997668130057,
+              "train_aux": 0.0,
+              "val_loss": 2.5811105966567993,
+              "lr": 0.00015357142857142853,
+              "seconds": 15.0
+            },
+            {
+              "epoch": 3,
+              "train_loss": 2.129700882094247,
+              "train_aux": 0.0,
+              "val_loss": 1.7073847651481628,
+              "lr": 0.00022857142857142854,
+              "seconds": 16.1,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0,
+              "selected": true
+            },
+            {
+              "epoch": 4,
+              "train_loss": 1.400696839605059,
+              "train_aux": 0.0,
+              "val_loss": 1.1889439225196838,
+              "lr": 0.0003,
+              "seconds": 15.5
+            },
+            {
+              "epoch": 5,
+              "train_loss": 1.020274553980146,
+              "train_aux": 0.0,
+              "val_loss": 0.9297837615013123,
+              "lr": 0.0002994292047137618,
+              "seconds": 15.8
+            },
+            {
+              "epoch": 6,
+              "train_loss": 0.8033969090098426,
+              "train_aux": 0.0,
+              "val_loss": 0.69998499751091,
+              "lr": 0.0002977211629518312,
+              "seconds": 15.1,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            },
+            {
+              "epoch": 7,
+              "train_loss": 0.6523388397125971,
+              "train_aux": 0.0,
+              "val_loss": 0.5623594522476196,
+              "lr": 0.0002948888739433602,
+              "seconds": 15.5
+            },
+            {
+              "epoch": 8,
+              "train_loss": 0.5394472508203416,
+              "train_aux": 0.0,
+              "val_loss": 0.40436066687107086,
+              "lr": 0.0002909538931178862,
+              "seconds": 15.1
+            },
+            {
+              "epoch": 9,
+              "train_loss": 0.45854713803245906,
+              "train_aux": 0.0,
+              "val_loss": 0.36049607396125793,
+              "lr": 0.0002859461680554975,
+              "seconds": 16.7,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            },
+            {
+              "epoch": 10,
+              "train_loss": 0.39240606129169464,
+              "train_aux": 0.0,
+              "val_loss": 0.2709633558988571,
+              "lr": 0.0002799038105676658,
+              "seconds": 19.4
+            },
+            {
+              "epoch": 11,
+              "train_loss": 0.3326557867583774,
+              "train_aux": 0.0,
+              "val_loss": 0.21845856308937073,
+              "lr": 0.00027287280664334875,
+              "seconds": 20.7
+            },
+            {
+              "epoch": 12,
+              "train_loss": 0.2898383828855696,
+              "train_aux": 0.0,
+              "val_loss": 0.19714178144931793,
+              "lr": 0.00026490666646784665,
+              "seconds": 16.7,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            },
+            {
+              "epoch": 13,
+              "train_loss": 0.2553189439432962,
+              "train_aux": 0.0,
+              "val_loss": 0.19493429362773895,
+              "lr": 0.00025606601717798207,
+              "seconds": 22.6
+            },
+            {
+              "epoch": 14,
+              "train_loss": 0.2197490699944042,
+              "train_aux": 0.0,
+              "val_loss": 0.1563565842807293,
+              "lr": 0.0002464181414529809,
+              "seconds": 19.9
+            },
+            {
+              "epoch": 15,
+              "train_loss": 0.19147264318806784,
+              "train_aux": 0.0,
+              "val_loss": 0.14406796544790268,
+              "lr": 0.00023603646545265687,
+              "seconds": 15.4,
+              "val_symbolic_em": 0.0,
+              "val_raw_em": 0.0,
+              "val_parse_validity": 1.0
+            }
+          ],
+          "best_epoch": 3,
+          "best_val_symbolic_em": 0.0
+        },
+        "test": {
+          "raw_exact_match": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.3903430336530645,
+            "n": 6,
+            "successes": 0
+          },
+          "symbolic_exact_match": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.3903430336530645,
+            "n": 6,
+            "successes": 0
+          },
+          "parse_validity": {
+            "value": 1.0,
+            "ci_low": 0.6096569663469354,
+            "ci_high": 0.9999999999999999,
+            "n": 6,
+            "successes": 6
+          },
+          "mass_dimension_validity": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.3903430336530645,
+            "n": 6,
+            "successes": 0
+          },
+          "channel_accuracy": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.3903430336530645,
+            "n": 6,
+            "successes": 0
+          },
+          "coefficient_exact": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.3903430336530645,
+            "n": 6,
+            "successes": 0
+          },
+          "monomial_f1": {
+            "value": 0.0,
+            "n": 6
+          },
+          "per_template": {
+            "Mul(Pow(Add(Mul(Integer(81), Pow": {
+              "value": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.5615060804490177,
+              "n": 3,
+              "successes": 0
+            }
+          },
+          "macro_template_accuracy": {
+            "value": 0.0,
+            "n_classes": 2
+          }
+        },
+        "moe_stats": [],
+        "minutes": 5.66,
+        "example_predictions": [
+          "/ + * INT+ 2 * INT+ 4 * INT+ 4 * ^ e INT+ 2 ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 4 * INT+ 4 * INT+ 2 * ^ e INT+ 2 * ^ e INT+ 4 * INT+ 2 * ^ e INT+ 4 * ^ e INT+ 2 * ^ e INT+ 2 ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e e e",
+          "/ + * INT+ 2 * INT+ 4 * INT+ 4 * ^ e INT+ 4 * INT+ 2 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 4 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 4 * ^ e INT+ 2 2 s_13 s_13 s_13",
+          "/ + * INT+ 2 * INT+ 4 * INT+ 4 * ^ e INT+ 2 ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 4 * INT+ 4 * INT+ 2 * ^ e INT+ 2 * ^ e INT+ 4 * INT+ 2 * ^ e INT+ 4 * ^ e INT+ 2 * ^ e INT+ 2 ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e INT+ 2 * ^ e e e"
+        ]
+      }
+    }
+  },
+  "baselines": {
+    "0": {
+      "most_frequent": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n": 6,
+          "successes": 6
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n": 6,
+          "successes": 6
+        },
+        "channel_accuracy": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.0,
+          "n": 6
+        },
+        "per_template": {
+          "Mul(Pow(Add(Mul(Integer(81), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.5615060804490177,
+            "n": 3,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 2
+        }
+      },
+      "exact_lookup": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n": 6,
+          "successes": 6
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n": 6,
+          "successes": 6
+        },
+        "channel_accuracy": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.0,
+          "n": 6
+        },
+        "per_template": {
+          "Mul(Pow(Add(Mul(Integer(81), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.5615060804490177,
+            "n": 3,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 2
+        }
+      },
+      "nearest_neighbour": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n": 6,
+          "successes": 6
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n": 6,
+          "successes": 6
+        },
+        "channel_accuracy": {
+          "value": 0.3333333333333333,
+          "ci_low": 0.09676933255921683,
+          "ci_high": 0.7000116786584712,
+          "n": 6,
+          "successes": 2
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.4000000000000001,
+          "n": 6
+        },
+        "per_template": {
+          "Mul(Pow(Add(Mul(Integer(81), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.5615060804490177,
+            "n": 3,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 2
+        }
+      },
+      "template_oracle": {
+        "raw_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "symbolic_exact_match": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "parse_validity": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n": 6,
+          "successes": 6
+        },
+        "mass_dimension_validity": {
+          "value": 1.0,
+          "ci_low": 0.6096569663469354,
+          "ci_high": 0.9999999999999999,
+          "n": 6,
+          "successes": 6
+        },
+        "channel_accuracy": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "coefficient_exact": {
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3903430336530645,
+          "n": 6,
+          "successes": 0
+        },
+        "monomial_f1": {
+          "value": 0.0,
+          "n": 6
+        },
+        "per_template": {
+          "Mul(Pow(Add(Mul(Integer(81), Pow": {
+            "value": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.5615060804490177,
+            "n": 3,
+            "successes": 0
+          }
+        },
+        "macro_template_accuracy": {
+          "value": 0.0,
+          "n_classes": 2
+        }
+      }
+    }
+  },
+  "started": "2026-08-31 09:03:43",
+  "data": {
+    "theory": "QED",
+    "n_records": 360,
+    "n_templates": 30,
+    "split": {
+      "train": 333,
+      "val": 21,
+      "test": 6
+    },
+    "vocab": {
+      "graph": 27,
+      "amp": 65,
+      "target": 37
+    },
+    "max_lengths": {
+      "graph": 34,
+      "amp": 264,
+      "target": 105
+    },
+    "oov": {
+      "val.graph_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "val.amp_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "val.target_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.graph_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.amp_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      },
+      "test.target_tokens": {
+        "rate": 0.0,
+        "unseen": {}
+      }
+    },
+    "build_seconds": 39.5
+  }
+}

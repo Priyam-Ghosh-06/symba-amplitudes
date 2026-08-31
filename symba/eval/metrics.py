@@ -36,6 +36,35 @@ def summarise(flags: list) -> dict:
 _EXPR_CACHE = {}
 _FRACTION_CACHE = {}
 
+# An untrained or half-trained decoder emits deeply nested rationals such as
+# ``/ / / / ... m_b m_b ...``. Those are perfectly well-formed, so the parser
+# accepts them, but ``together``/``expand`` on them is combinatorial and can run
+# for minutes on a single sample. A reference target is ~40 operations; anything
+# an order of magnitude past that cannot be equal to one, so it is scored wrong
+# without being expanded. Bail-outs are counted and reported rather than hidden.
+COMPLEXITY_CAP = 600
+_bailouts = {"count": 0}
+
+
+def bailout_count() -> int:
+    """How many predictions were rejected on complexity rather than compared."""
+    return _bailouts["count"]
+
+
+def reset_bailouts():
+    _bailouts["count"] = 0
+
+
+def _too_complex(expr) -> bool:
+    try:
+        if sympy.count_ops(expr) > COMPLEXITY_CAP:
+            _bailouts["count"] += 1
+            return True
+    except Exception:
+        _bailouts["count"] += 1
+        return True
+    return False
+
 
 def _safe_expr(tokens):
     """Parse a token list to sympy, memoised - references repeat every eval."""
@@ -46,13 +75,27 @@ def _safe_expr(tokens):
         expr = from_prefix(tokens)
     except Exception:
         expr = None
-    if len(_EXPR_CACHE) < 100_000:
+    if len(_EXPR_CACHE) < 20_000:
         _EXPR_CACHE[key] = expr
     return expr
 
 
+def clear_caches():
+    """Drop the memo tables and sympy's global cache.
+
+    sympy caches aggressively by design. Scoring thousands of distinct junk
+    expressions per run grows that cache without bound, which is what took the
+    first QED job from 733 MB to 3.7 GB.
+    """
+    _EXPR_CACHE.clear()
+    _FRACTION_CACHE.clear()
+    sympy.core.cache.clear_cache()
+
+
 def _as_fraction(expr):
     """``(expanded numerator, denominator)`` for a rational expression."""
+    if expr is None or _too_complex(expr):
+        return (None, None)
     key = sympy.srepr(expr)
     if key in _FRACTION_CACHE:
         return _FRACTION_CACHE[key]
@@ -61,7 +104,7 @@ def _as_fraction(expr):
         result = (sympy.expand(numerator), sympy.expand(denominator))
     except Exception:
         result = (None, None)
-    if len(_FRACTION_CACHE) < 100_000:
+    if len(_FRACTION_CACHE) < 20_000:
         _FRACTION_CACHE[key] = result
     return result
 
@@ -78,6 +121,8 @@ def symbolically_equal(a, b) -> bool:
         return False
     if a == b:
         return True
+    if _too_complex(a):
+        return False
     na, da = _as_fraction(a)
     nb, db = _as_fraction(b)
     if na is None or nb is None:
@@ -109,6 +154,7 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
     raw_em, symbolic_em, well_formed, dim_ok = [], [], [], []
     channel_ok, monomial_f1, coeff_ok = [], [], []
     per_class = defaultdict(list)
+    bailouts_before = bailout_count()
 
     for i, (pred, ref) in enumerate(zip(predictions, references)):
         raw_match = pred == ref
@@ -167,6 +213,10 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
         "monomial_f1": {"value": (sum(monomial_f1) / len(monomial_f1)
                                   if monomial_f1 else 0.0),
                         "n": len(monomial_f1)},
+        # Predictions too complex to be compared, scored wrong. High early in
+        # training, and should fall to zero as the model learns to close an
+        # expression instead of nesting operators.
+        "complexity_bailouts": bailout_count() - bailouts_before,
     }
 
     if per_class:

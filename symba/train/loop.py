@@ -21,7 +21,7 @@ import torch.nn as nn
 
 from ..config import PAD
 from ..eval.decode import ConstraintMask, beam_search
-from ..eval.metrics import evaluate_predictions
+from ..eval.metrics import clear_caches, evaluate_predictions
 
 
 def build_optimizer(model, tcfg):
@@ -103,7 +103,9 @@ def evaluate_split(model, loader, dataset, vocab, tcfg, device, max_len,
             references.append(vocab.decode(batch["target"][i].tolist()[1:]))
         templates.extend(batch["template"])
 
-    return evaluate_predictions(predictions, references, templates), predictions
+    scored = evaluate_predictions(predictions, references, templates)
+    clear_caches()          # sympy's global cache grows without bound otherwise
+    return scored, predictions
 
 
 def train_model(model, bundle, cfg, device, run_name="run", log=print):
