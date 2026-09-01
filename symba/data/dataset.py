@@ -70,6 +70,11 @@ class AmplitudeDataset(Dataset):
         return tuple(max(item[key].size(0) for item in self.items)
                      for key in ("graph", "amp", "target"))
 
+    def segment_length(self) -> int:
+        """Longest single diagram, which is what the math encoder attends over."""
+        return max(t.size(0) for item in self.items
+                   for t in item["amp_segments"])
+
 
 def _pad_stack(tensors):
     """Pad to the longest in the batch and return ``(ids, key_padding_mask)``.
@@ -120,9 +125,10 @@ def collate(batch):
 class LengthBucketSampler(torch.utils.data.Sampler):
     """Group similar-length items so dynamic padding actually saves work.
 
-    Buckets are shuffled every epoch, and items are shuffled inside a bucket, so
-    this keeps randomness while avoiding batches whose longest member is ten
-    times the median.
+    Batch composition is fixed by length order; the order the batches are
+    visited is reshuffled each epoch. That keeps run-to-run variation without
+    letting a batch pair a 20-token item with a 2000-token one and pad both to
+    the larger.
     """
 
     def __init__(self, dataset, batch_size, shuffle=True, generator=None):

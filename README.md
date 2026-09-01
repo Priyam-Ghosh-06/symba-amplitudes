@@ -44,23 +44,48 @@ baseline score **0%**. See [RESULTS.md](RESULTS.md).
 pip install -r requirements.txt
 ```
 
-Run the gate tests first — they are the reason to trust anything below:
+**1. Verify the pipeline.** The gate tests are the reason to trust anything
+below; nothing else should be run until they pass.
 
 ```bash
 python tests/test_gates.py
 ```
 
-Train and evaluate one grid:
+**2. Train.** Jobs run one at a time and any `(arm, seed)` already in the
+output file is skipped, so an interrupted batch resumes rather than restarts.
 
 ```bash
-python scripts/run_experiment.py --theory QED --arms full_vanilla_dense math_only graph_only --seeds 0
+python scripts/run_queue.py --batch core
 ```
 
-Read the results:
+See what a batch will do, or what is already done:
 
 ```bash
-python scripts/report.py results/QED_record_seed0.json
+python scripts/run_queue.py --list
 ```
+
+**3. Read the results.**
+
+```bash
+python scripts/report.py results/*.json
+```
+
+**4. Predict with a trained checkpoint.**
+
+```bash
+python scripts/predict.py --list
+```
+
+```bash
+python scripts/predict.py --checkpoint checkpoints/QCD_record_long__full_vanilla_dense__seed0.pt --input data/Symba/QCD/QCD-2-to-2-diag-TreeLevel-0.txt --limit 5
+```
+
+Every finished run writes `checkpoints/<job>__<arm>__seed<n>.pt`, carrying the
+weights, the config, the three vocabularies and the sequence lengths — enough
+to rebuild the model and reproduce its decoding with no access to the training
+data. `scripts/predict.py` applies the identical S2–S5 preprocessing, and when
+the input line carries a ground-truth `sq_amp` it scores the prediction with
+the same symbolic-equivalence test used in training.
 
 ---
 

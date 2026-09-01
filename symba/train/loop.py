@@ -11,7 +11,6 @@ Two departures from the previous version, both from 02 SS5.1 and SS1.6:
 """
 
 import copy
-import json
 import math
 import os
 import time
@@ -84,7 +83,7 @@ def run_epoch(model, loader, optimizer, scheduler, criterion, device, tcfg,
 
 
 @torch.no_grad()
-def evaluate_split(model, loader, dataset, vocab, tcfg, device, max_len,
+def evaluate_split(model, loader, vocab, tcfg, device, max_len,
                    constraint=None, beam_width=None):
     """Free-running decode over a split, scored with the full metric suite."""
     model.eval()
@@ -147,9 +146,8 @@ def train_model(model, bundle, cfg, device, run_name="run", log=print):
         due = (epoch % tcfg.eval_every == 0) or epoch == tcfg.num_epochs
         if due:
             val_metrics, _ = evaluate_split(
-                model, loaders["val"], bundle.datasets["val"], vocab, tcfg,
-                device, max_len, constraint,
-                beam_width=tcfg.select_beam_width)
+                model, loaders["val"], vocab, tcfg, device, max_len,
+                constraint, beam_width=tcfg.select_beam_width)
             score = val_metrics["symbolic_exact_match"]["value"]
             entry["val_symbolic_em"] = score
             entry["val_raw_em"] = val_metrics["raw_exact_match"]["value"]

@@ -11,12 +11,14 @@ a single process. That matters for two reasons measured on this machine:
   instead of paying for it again.
 """
 
+import os
 import time
 import traceback
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import torch
 
+from .checkpoint import save as save_checkpoint
 from .config import Config
 from .data.pipeline import build
 from .eval.baselines import run_all as run_baselines
@@ -117,17 +119,27 @@ def run_arm(arm: str, seed: int, job: Job, bundles: BundleCache,
         model = AmplitudeModel(run_cfg.model, bundle.graph_vocab,
                                bundle.amp_vocab, bundle.target_vocab,
                                bundle.lengths,
-                               segment_amp=bundle.segment_amp)
+                               segment_amp=bundle.segment_amp,
+                               segment_len=bundle.segment_len)
         trained = train_model(model, bundle, run_cfg, device,
                               run_name=run_name, log=log)
 
         max_len = bundle.lengths[2] + 4
         test_metrics, predictions = evaluate_split(
-            model, bundle.loaders["test"], bundle.datasets["test"],
-            bundle.target_vocab, run_cfg.train, device, max_len,
+            model, bundle.loaders["test"], bundle.target_vocab,
+            run_cfg.train, device, max_len,
             ConstraintMask(bundle.target_vocab))
 
+        # Persist the selected weights. Without this a finished run leaves no
+        # artefact and inference is impossible.
+        ckpt_path = os.path.join("checkpoints", f"{job.name}__{arm}__seed{seed}.pt")
+        save_checkpoint(ckpt_path, model, run_cfg, bundle,
+                        metrics={"test": test_metrics,
+                                 "best_val_symbolic_em":
+                                     trained.get("best_val_symbolic_em")})
+
         entry = {
+            "checkpoint": ckpt_path,
             "config": run_cfg.to_dict(),
             "n_parameters": model.n_parameters(),
             "train": trained,

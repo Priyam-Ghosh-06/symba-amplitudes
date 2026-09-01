@@ -12,11 +12,7 @@ do not depend on filesystem traversal order (02 SS2.1).
 import hashlib
 from collections import defaultdict
 
-import sympy
-
 from .canonical import template_key
-
-_PARTICLE_TO_MASS = {}          # populated lazily; m_<particle>
 
 
 def _stable_hash(text: str) -> float:
@@ -131,10 +127,3 @@ def assert_disjoint(train, val, test):
                     f"{names[i]}/{names[j]} share {len(overlap)} records")
     return True
 
-
-def class_summary(records) -> dict:
-    """Counts per template class, for the per-class error breakdown (03 SS5.2)."""
-    counts = defaultdict(int)
-    for record in records:
-        counts[record["template"]] += 1
-    return dict(counts)

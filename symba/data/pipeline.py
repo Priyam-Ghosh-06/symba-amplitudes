@@ -13,7 +13,7 @@ import torch
 
 from ..config import Config
 from .ast_parse import parse_amp_record
-from .canonical import canonicalise_record, verify_equivalence
+from .canonical import canonicalise_record
 from .dataset import AmplitudeDataset, make_loader
 from .graph import build_graph_record
 from .load import load_theory
@@ -107,6 +107,7 @@ def build(cfg: Config, verify_canonical: bool = False, verbose: bool = True):
 
     lengths = tuple(max(datasets[n].lengths()[i] for n in datasets)
                     for i in range(3))
+    segment_len = max(datasets[n].segment_length() for n in datasets)
 
     stats = {
         "theory": cfg.data.theory,
@@ -119,6 +120,7 @@ def build(cfg: Config, verify_canonical: bool = False, verbose: bool = True):
                         "target": lengths[2]},
         "oov": oov,
         "segment_amp": segment_amp,
+        "segment_len": segment_len,
         "build_seconds": round(time.time() - t0, 1),
     }
 
@@ -137,6 +139,7 @@ def build(cfg: Config, verify_canonical: bool = False, verbose: bool = True):
                     (graph_vocab, amp_vocab, target_vocab),
                     datasets, loaders, lengths, stats)
     bundle.segment_amp = segment_amp
+    bundle.segment_len = segment_len
     return bundle
 
 

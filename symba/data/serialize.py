@@ -15,7 +15,6 @@ import sympy
 from sympy import Add, Mul, Pow, Integer, Rational, Symbol
 
 from ..config import TYPE_TO_ID
-from .canonical import symbol_dimension
 
 INT_POS, INT_NEG = "INT+", "INT-"
 DIGITS = [str(d) for d in range(10)]

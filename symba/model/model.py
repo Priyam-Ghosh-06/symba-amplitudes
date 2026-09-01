@@ -38,14 +38,17 @@ class EncoderBlock(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, cfg, vocab, max_len):
+    """One encoder stack. ``n_layers`` is explicit because the graph and math
+    pathways have separate depths and must not share one by accident."""
+
+    def __init__(self, cfg, vocab, max_len, n_layers):
         super().__init__()
         self.embed = TokenEmbedding(
             len(vocab), cfg.d_model, max_len,
             type_ids=vocab.type_ids() if cfg.use_type_embedding else None,
             dropout=cfg.dropout, scheme=cfg.embedding)
         self.blocks = nn.ModuleList([EncoderBlock(cfg)
-                                     for _ in range(cfg.graph_layers)])
+                                     for _ in range(n_layers)])
         self.norm = nn.LayerNorm(cfg.d_model)
 
     def forward(self, ids, key_padding_mask=None, type_ids=None):
@@ -59,6 +62,8 @@ class DecoderBlock(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.norm1 = nn.LayerNorm(cfg.d_model)
+        # Deliberately vanilla: the XSA arms are a claim about the *encoders*
+        # (03 SS4.3), so the decoder is held fixed across them.
         self.self_attn = MultiHeadAttention(cfg.d_model, cfg.num_heads,
                                             "vanilla", cfg.attn_dropout)
         self.norm2 = nn.LayerNorm(cfg.d_model)
@@ -97,7 +102,7 @@ class AmplitudeModel(nn.Module):
     """
 
     def __init__(self, cfg, graph_vocab, amp_vocab, target_vocab, lengths,
-                 segment_amp: bool = True):
+                 segment_amp: bool = True, segment_len: int = 0):
         super().__init__()
         self.cfg = cfg
         self.cfg_data_segments = segment_amp
@@ -107,11 +112,16 @@ class AmplitudeModel(nn.Module):
         if not (cfg.use_graph or cfg.use_math):
             raise ValueError("at least one encoder pathway must be enabled")
 
-        self.graph_encoder = (Encoder(cfg, graph_vocab, graph_len + 8)
-                              if cfg.use_graph else None)
-        self.math_encoder = (Encoder(cfg, amp_vocab, amp_len + 8)
-                             if cfg.use_math else None)
-        self.amp_len = amp_len
+        self.graph_encoder = (
+            Encoder(cfg, graph_vocab, graph_len + 8, cfg.graph_layers)
+            if cfg.use_graph else None)
+        # With segmentation the math encoder only ever sees one diagram, so its
+        # positional table is sized to the longest segment rather than to the
+        # whole amplitude - 239 rows instead of 2861 on QCD.
+        math_len = (segment_len if segment_amp and segment_len else amp_len)
+        self.math_encoder = (
+            Encoder(cfg, amp_vocab, math_len + 8, cfg.math_layers)
+            if cfg.use_math else None)
         self.modality_embed = nn.Embedding(2, cfg.d_model)
 
         self.decoder_embed = TokenEmbedding(
@@ -122,9 +132,6 @@ class AmplitudeModel(nn.Module):
                                      for _ in range(cfg.dec_layers)])
         self.norm = nn.LayerNorm(cfg.d_model)
         self.fc_out = nn.Linear(cfg.d_model, len(target_vocab), bias=False)
-
-        if cfg.gated_fusion:
-            self.fusion_gate = nn.Linear(cfg.d_model * 2, cfg.d_model)
 
         self.apply(self._init_weights)
         if cfg.tie_embeddings:

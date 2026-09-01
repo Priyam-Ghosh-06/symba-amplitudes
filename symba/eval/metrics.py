@@ -55,9 +55,6 @@ def bailout_count() -> int:
     return _bailouts["count"]
 
 
-def reset_bailouts():
-    _bailouts["count"] = 0
-
 
 def _too_complex(expr) -> bool:
     try:
@@ -125,8 +122,6 @@ def symbolically_equal(a, b) -> bool:
         return False
     if a == b:
         return True
-    if _too_complex(a):
-        return False
     na, da = _as_fraction(a)
     nb, db = _as_fraction(b)
     if na is None or nb is None:

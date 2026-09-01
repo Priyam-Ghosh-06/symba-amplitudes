@@ -134,7 +134,9 @@ def main():
                 model = AmplitudeModel(run_cfg.model, run_bundle.graph_vocab,
                                        run_bundle.amp_vocab,
                                        run_bundle.target_vocab,
-                                       run_bundle.lengths)
+                                       run_bundle.lengths,
+                                       segment_amp=run_bundle.segment_amp,
+                                       segment_len=run_bundle.segment_len)
                 trained = train_model(model, run_bundle, run_cfg, device,
                                       run_name=run_name)
 
@@ -142,7 +144,7 @@ def main():
                 constraint = ConstraintMask(run_bundle.target_vocab)
                 test_metrics, predictions = evaluate_split(
                     model, run_bundle.loaders["test"],
-                    run_bundle.datasets["test"], run_bundle.target_vocab,
+                    run_bundle.target_vocab,
                     run_cfg.train, device, max_len, constraint)
 
                 entry = {

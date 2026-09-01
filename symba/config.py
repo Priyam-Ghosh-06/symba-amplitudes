@@ -4,8 +4,7 @@ Every knob the pipeline reads lives here. Nothing downstream defines its own
 default, so a run is fully described by its config plus its seed.
 """
 
-from dataclasses import dataclass, field, asdict, replace
-from typing import Optional
+from dataclasses import asdict, dataclass, field, replace
 
 import json
 import os
@@ -43,9 +42,6 @@ class DataConfig:
     #   QED   13s flat -> 31s segmented
     # True | False force it, for the ablation arm.
     segment_amp: str = "auto"
-    # A parse failure is a build failure (01 P2). Only flip this to inspect a
-    # broken corpus; it is asserted off in the gate tests.
-    allow_parse_failures: bool = False
 
 
 @dataclass
@@ -68,17 +64,13 @@ class ModelConfig:
     embedding: str = "plain"            # plain | role_filler | tpr
     use_type_embedding: bool = True
     tie_embeddings: bool = True
-    tokenizer: str = "vocab"            # vocab | gbst
-    gbst_block_sizes: tuple = (1, 2, 3, 4)
-    gbst_downsample: int = 2
 
     use_graph: bool = True
     use_math: bool = True
-    gated_fusion: bool = False
 
-    # Positional tables are allocated from the fitted data lengths, never from a
-    # 2048 default that would waste ~3M untouched parameters (02 §3.10).
-    max_seq_len: int = 0                # 0 => derived from the dataset
+    # Positional table sizes come from the measured data lengths, not from a
+    # 2048 default that would allocate ~3M rows never touched by a gradient
+    # (02 SS3.10). There is deliberately no max_seq_len field.
 
 
 @dataclass
@@ -92,9 +84,9 @@ class TrainConfig:
     num_epochs: int = 60
     patience: int = 12
     seed: int = 0
-    # Model selection is on a task metric, never on a smoothed likelihood
-    # (02 §5.1: the CE floor was 0.8778 and the run reached 0.8828).
-    select_on: str = "val_symbolic_em"
+    # Selection is on free-running symbolic exact match on the validation
+    # split, never on a smoothed likelihood (02 SS5.1: the CE floor was 0.8778
+    # and the run reached 0.8828, so the selection signal was 5e-3 wide).
     eval_every: int = 2                 # free-running eval cadence, in epochs
     beam_width: int = 4          # final test decoding
     # Validation evals run every few epochs and only have to *rank* checkpoints,
@@ -103,7 +95,6 @@ class TrainConfig:
     select_beam_width: int = 1
     length_penalty: float = 0.7         # GNMT alpha; 0 disables
     constrained_decoding: bool = True
-    device: str = "auto"
 
 
 @dataclass

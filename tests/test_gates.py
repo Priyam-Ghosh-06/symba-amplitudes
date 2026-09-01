@@ -380,6 +380,72 @@ def test_constrained_decoding_only_emits_parseable_sequences():
         f"only {parseable}/{len(decoded)} constrained outputs parse")
 
 
+def test_encoder_depths_are_independent():
+    """Regression: both encoders were built with cfg.graph_layers, so
+    math_layers was silently dead config and the math stack took the graph
+    depth."""
+    cfg, b = bundle()
+    model_cfg = cfg.model.__class__(**{**vars(cfg.model),
+                                       "graph_layers": 1, "math_layers": 3})
+    model = AmplitudeModel(model_cfg, b.graph_vocab, b.amp_vocab,
+                           b.target_vocab, b.lengths,
+                           segment_amp=b.segment_amp,
+                           segment_len=b.segment_len)
+    assert len(model.graph_encoder.blocks) == 1
+    assert len(model.math_encoder.blocks) == 3
+
+
+def test_checkpoint_round_trip_reproduces_predictions():
+    """A checkpoint must be enough to rebuild the model and decode identically.
+
+    Training used to keep the selected weights in memory only, so a finished
+    run left nothing to run inference from.
+    """
+    import tempfile
+    from symba.checkpoint import load as load_checkpoint
+    from symba.checkpoint import save as save_checkpoint
+
+    cfg, b = bundle()
+    torch.manual_seed(0)
+    model = AmplitudeModel(cfg.model, b.graph_vocab, b.amp_vocab,
+                           b.target_vocab, b.lengths,
+                           segment_amp=b.segment_amp,
+                           segment_len=b.segment_len).eval()
+
+    batch = next(iter(b.loaders["val"]))
+    constraint = ConstraintMask(b.target_vocab)
+    before = beam_search(model, batch, b.target_vocab, beam_width=2,
+                         max_len=40, constrained=True, constraint=constraint)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "ckpt.pt")
+        save_checkpoint(path, model, cfg, b)
+        restored, cfg2, vocabs, meta = load_checkpoint(path)
+
+    assert vocabs[2].itos == b.target_vocab.itos
+    assert meta["segment_amp"] == b.segment_amp
+    assert cfg2.model.d_model == cfg.model.d_model
+
+    after = beam_search(restored, batch, vocabs[2], beam_width=2, max_len=40,
+                        constrained=True,
+                        constraint=ConstraintMask(vocabs[2]))
+    assert before == after, "reloaded checkpoint decodes differently"
+
+
+def test_inference_path_matches_training_preprocessing():
+    """The predictor must build the same tensors the trainer did."""
+    from symba.inference import prepare_record
+
+    _cfg, b = bundle()
+    record = b.test[0]
+    prepared = prepare_record(record.interaction, record.vertices, record.amp)
+
+    assert prepared["graph_tokens"] == record["graph_tokens"]
+    assert prepared["amp_tokens"] == record["amp_tokens"]
+    assert prepared["amp_segments"] == record["amp_segments"] or \
+        not b.segment_amp
+
+
 def test_segmentation_preserves_the_amplitude():
     """Splitting into diagrams must not lose or invent content.
 

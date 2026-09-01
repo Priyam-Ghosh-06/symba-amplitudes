@@ -77,13 +77,3 @@ class TokenEmbedding(nn.Module):
 
         return self.dropout(self.norm(x))
 
-
-def unbind(bound, role_vector, scheme="tpr"):
-    """Recover a filler from a TPR-bound state (03 SS4.1 unbinding test).
-
-    Only meaningful for ``scheme='tpr'``; the additive schemes have no inverse,
-    which is exactly the point being tested.
-    """
-    if scheme != "tpr":
-        raise ValueError("unbinding is only defined for the tpr scheme")
-    return bound / (torch.tanh(role_vector) + 1e-6)
