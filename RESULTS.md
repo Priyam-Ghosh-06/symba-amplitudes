@@ -63,12 +63,18 @@ before any model ran. The target went from a 2872-character worst case to 258,
 from a 260-symbol byte alphabet to a 31-symbol typed vocabulary, and from 100%
 of targets truncated to none.
 
-**3. Constrained decoding.** Parse validity is 100% by construction. Notably,
-the `unconstrained_decode` arm on QCD *also* reaches 100% parse validity once
-trained (57.1% symbolic EM vs 50.0% for the constrained control — inside the
-interval either way at n=14). So the constraint is load-bearing early in
-training and largely redundant at convergence. It costs nothing and removes a
-failure mode, but it is not where the accuracy comes from.
+**3. Per-diagram encoding.** Encoding each Feynman diagram separately cut QCD
+encoder attention work 10.7x, dropped the longest attended sequence from 2859
+tokens to 239, and took a training epoch from 107 s to 45 s. That is what made
+120-epoch QCD runs affordable on CPU at all, and 120 epochs is what took QCD
+from 50% to 100%.
+
+**4. Constrained decoding — but not for the reason expected.** Parse validity
+is 100% by construction, yet `unconstrained_decode` matches the control exactly
+on QED (83.0% both) and also reaches 100% parse validity once trained. The
+constraint is load-bearing early in training and redundant at convergence. It
+costs nothing and removes a failure mode; it is not where the accuracy comes
+from.
 
 ---
 
@@ -155,14 +161,14 @@ is not implemented.
 
 Honest gaps, in rough order of how much they would change the picture:
 
-- **QCD at full training length.** The single most important rerun. Every QCD
-  number above is at 30 epochs.
-- **Seed replication.** Every number is one seed. Three seeds minimum before
-  any arm comparison means anything (docs/01 §6.4). The 30-epoch multi-seed runs
-  were discarded as under-trained.
-- **The QED arm grid at 120 epochs.** `xsa_proj` vs `xsa_mask` vs `vanilla`,
-  MoE vs dense, and the capacity sweep have not been run at a length where they
-  would be informative on QED.
+- **Seed replication.** Every number above is one seed. Three seeds minimum
+  before any arm comparison means anything (docs/01 SS6.4), and with intervals
+  this wide the QED arm ordering is currently noise. Running
+  (`--batch seeds`).
+- **The capacity sweep.** `capacity_64` / `capacity_256`, plus
+  `no_type_embedding`, `role_filler` and `tpr_binding`, have not been run at
+  120 epochs (`--batch capacity`).
+- **A QCD test set worth the name.** n=14 makes 100% and 93% indistinguishable.
 - **Leave-one-template-out**, which would give protocol B an n equal to the
   class count instead of a single arbitrary grouping.
 - **The structured head** (docs/03 §2.3) — predicting denominator channel,
