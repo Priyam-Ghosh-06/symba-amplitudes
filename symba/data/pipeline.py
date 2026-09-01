@@ -68,7 +68,11 @@ def build(cfg: Config, verify_canonical: bool = False, verbose: bool = True):
             record["target_tokens"] = amp_to_prefix(record["sq_amp_std"])
 
         if cfg.data.amp_representation == "raw":
+            # The physics-free control of 03 SS3.4: characters instead of the
+            # AST. Both views must change together, or segmentation would feed
+            # the encoder the parsed diagrams anyway.
             record["amp_tokens"] = list(record["amp_std"])
+            record["amp_segments"] = [record["amp_tokens"]]
 
     segment_amp = resolve_segmentation(cfg.data.segment_amp, records)
     if not segment_amp:

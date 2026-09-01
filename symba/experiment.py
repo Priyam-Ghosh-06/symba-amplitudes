@@ -46,6 +46,9 @@ ARMS = {
     "unconstrained_decode": {"train.constrained_decoding": False},
     "raw_target":           {"data.target": "raw"},
     "no_segmentation":      {"data.segment_amp": False},
+    # The physics-free control (03 SS3.4): raw characters, no grammar.
+    "raw_amp":              {"data.amp_representation": "raw",
+                             "data.segment_amp": False},
 }
 
 

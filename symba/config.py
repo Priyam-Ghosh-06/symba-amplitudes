@@ -1,7 +1,8 @@
-"""Experiment configuration. One dataclass tree, one YAML per experiment.
+"""Experiment configuration: one dataclass tree.
 
-Every knob the pipeline reads lives here. Nothing downstream defines its own
-default, so a run is fully described by its config plus its seed.
+Every knob the pipeline reads lives here, and nothing downstream defines its
+own default, so a run is fully described by this config plus its seed. Named
+combinations live in ``symba/experiment.py`` as ARMS.
 """
 
 from dataclasses import asdict, dataclass, field, replace
@@ -26,7 +27,10 @@ TYPE_TO_ID = {t: i for i, t in enumerate(TOKEN_TYPES)}
 class DataConfig:
     root: str = "data/Symba"
     theory: str = "QED"                 # QED | QCD
-    split_protocol: str = "record"      # record (A) | template (B) | cross (C)
+    # record = protocol A, template = protocol B (01 SS5). Protocol C
+    # (cross-theory transfer) is specified in the docs but not implemented;
+    # split_records raises on anything else rather than silently falling back.
+    split_protocol: str = "record"      # record | template
     val_frac: float = 0.1
     test_frac: float = 0.1
     target: str = "canonical"           # canonical | raw
@@ -89,9 +93,9 @@ class TrainConfig:
     # and the run reached 0.8828, so the selection signal was 5e-3 wide).
     eval_every: int = 2                 # free-running eval cadence, in epochs
     beam_width: int = 4          # final test decoding
-    # Validation evals run every few epochs and only have to *rank* checkpoints,
-    # so they decode greedily. Beam search here has no KV cache and costs
-    # beam_width times more for a selection signal that barely changes.
+    # Validation evals only have to *rank* checkpoints, so they decode greedily:
+    # beam search costs beam_width times more for a selection signal that barely
+    # moves. The final test number still uses beam_width.
     select_beam_width: int = 1
     length_penalty: float = 0.7         # GNMT alpha; 0 disables
     constrained_decoding: bool = True
