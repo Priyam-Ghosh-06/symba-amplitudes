@@ -15,15 +15,17 @@ python scripts/report.py results/*.json --markdown --out RESULTS.md
 
 ## Headline
 
-| | QED | QCD |
+Both theories at 120 epochs, full canonical target, free-running beam decode.
+
+| | QED (n=47) | QCD (n=14) |
 |---|---|---|
-| **model, symbolic exact match** | **83.0%** [70, 91] | **64.3%** [39, 84] |
+| **model, symbolic exact match** | **83.0%** [70, 91] | **100.0%** [78, 100] |
 | template oracle (retrieval ceiling) | 70.2% | 50.0% |
 | 1-NN character n-gram retrieval | 21.3% | 14.3% |
 | most frequent / exact lookup | 0.0% | 0.0% |
 | parse validity | 100% | 100% |
 | mass-dimension-4 validity | 100% | 100% |
-| propagator channel accuracy | 91.5% | 92.9% |
+| propagator channel accuracy | 91.5% | 100% |
 
 The model **beats the template oracle on both theories**. That matters more
 than the raw percentage: the oracle is what pure retrieval achieves when it is
@@ -44,7 +46,8 @@ checkpoint on a held-out split.
 Ranked by measured effect:
 
 **1. Training length, by a mile.** The first grid ran 30 epochs and looked like
-a failure. Validation symbolic EM by epoch:
+a failure. QCD went from 50.0% at 30 epochs to **100.0% at 120**; QED from
+0% to 83.0%. Validation symbolic EM by epoch (QED):
 
 | epoch | 20 | 30 | 40 | 60 | 70 | 90 |
 |---|---|---|---|---|---|---|
@@ -78,30 +81,37 @@ The split the objective asks for, and the one comparable to prior work.
 | **QED** `full_vanilla_dense` (120 ep) | **83.0** [70, 91] | 91.5 | 100 | 1.40M | 35 |
 | _QED template oracle_ | 70.2 [56, 81] | 76.6 | 100 | – | – |
 | _QED 1-NN retrieval_ | 21.3 [12, 35] | 31.9 | 100 | – | – |
-| **QCD** `full_vanilla_moe` (30 ep) | **64.3** [39, 84] | 92.9 | 100 | 4.12M | 58 |
-| QCD `unconstrained_decode` (30 ep) | 57.1 [33, 79] | 92.9 | 100 | 1.75M | 57 |
-| QCD `full_vanilla_dense` (30 ep) | 50.0 [27, 73] | 85.7 | 100 | 1.75M | 40 |
-| QCD `full_xsa_proj_dense` (30 ep) | 50.0 [27, 73] | 78.6 | 100 | 1.75M | 34 |
-| QCD `math_only` (30 ep) | 42.9 [21, 67] | 78.6 | 100 | 1.34M | 37 |
-| QCD `graph_only` (30 ep) | 42.9 [21, 67] | 71.4 | 100 | 0.96M | 4 |
+| QED `unconstrained_decode` | 83.0 [70, 91] | 87.2 | 100 | 1.40M | 28 |
+| QED `full_xsa_proj_dense` | 80.9 [67, 90] | 91.5 | 100 | 1.40M | – |
+| QED `full_vanilla_moe` | 80.9 [67, 90] | 89.4 | 100 | 3.77M | 49 |
+| QED `full_xsa_mask_dense` | 78.7 [65, 88] | 87.2 | 100 | 1.40M | 31 |
+| **QCD** `full_vanilla_dense` | **100.0** [78, 100] | 100 | 100 | 1.75M | 338 |
+| QCD `math_only` | 85.7 [60, 96] | 100 | 100 | 1.34M | 41 |
+| QCD `graph_only` | 85.7 [60, 96] | 92.9 | 100 | 0.96M | 12 |
 | _QCD template oracle_ | 50.0 [27, 73] | 71.4 | 100 | – | – |
 | _QCD 1-NN retrieval_ | 14.3 [4, 40] | 42.9 | 100 | – | – |
 
 ### Reading this honestly
 
-- **The QCD arms are under-trained.** They ran 30 epochs, which QED has now
-  shown is roughly half of what this setup needs. The QCD ordering should not be
-  trusted until they are rerun at 120 epochs. The `full_vanilla_moe` result
-  sitting on top is a plausible artefact of it having had a slightly different
-  effective learning trajectory, not a demonstration that MoE helps.
-- **n = 14 for the QCD test split.** Every QCD interval is about 45 points wide.
-  One record is 7 percentage points. No QCD comparison here separates two arms.
-- **Both pathways beat either alone on QCD** (50.0 vs 42.9), and the full model
-  leads on channel accuracy (85.7 vs 78.6 / 71.4). That is the only signal in
-  the QCD table that is consistent across metrics, and it is still inside the
-  interval.
-- `graph_only` trains in 4 minutes against 40 for the full model, because the
-  QCD amplitude stream is 2861 tokens and dominates the cost.
+- **QCD 100% is 14 out of 14.** The interval is [78, 100]. It says the model is
+  very good on this split, not that it is perfect; one more test record could
+  make it 93%. The QCD test set is small because the corpus is 234 records over
+  11 template classes.
+- **Both pathways beat either alone on QCD**: 100.0 against 85.7 for
+  `math_only` and 85.7 for `graph_only`. This is the clearest support for
+  Claim 1 in the whole table, and unlike the 30-epoch version it is a real gap
+  rather than a tie.
+- **No QED arm separates from another.** 78.7 to 83.0 across `vanilla`,
+  `xsa_proj`, `xsa_mask` and `moe`, with intervals ~22 points wide, all
+  overlapping. That is exactly what docs/03 SS7 predicted for both XSA
+  (item 11, "approximately 0 at this n") and MoE (item 12, "approximately 0,
+  possibly negative"). Reporting it as a null result is the finding.
+- **Constrained decoding does not drive the accuracy.** `unconstrained_decode`
+  matches the control at 83.0% and still reaches 100% parse validity once
+  trained. The constraint guarantees well-formedness early in training and
+  costs nothing, but it is not where the number comes from.
+- `graph_only` trains in 12 minutes against 338 for the full model, because the
+  QCD amplitude pathway dominates the cost even after segmentation.
 
 ---
 

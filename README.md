@@ -34,9 +34,10 @@ live in [`docs/`](docs/).
 ## Results
 
 QED **83.0%** symbolic exact match [70, 91] against a 70.2% retrieval ceiling
-and a 21.3% 1-NN baseline, with 100% parse and mass-dimension validity. Under a
-template split, where whole functional forms are held out, the model and every
-baseline score **0%**. See [RESULTS.md](RESULTS.md).
+and a 21.3% 1-NN baseline. QCD **100%** [78, 100] on n=14, against a 50.0%
+ceiling. Parse validity and mass-dimension validity are 100% throughout. Under
+a template split, where whole functional forms are held out, the model and
+every baseline score **0%**. See [RESULTS.md](RESULTS.md).
 
 ## Quick start
 
