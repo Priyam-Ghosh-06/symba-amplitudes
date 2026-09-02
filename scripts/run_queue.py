@@ -79,7 +79,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--batch", nargs="+", default=["core"],
-                        help=f"one or more of: {', '.join(BATCHES)}")
+                        help=f"'all', or one or more of: {', '.join(BATCHES)}")
     parser.add_argument("--list", action="store_true",
                         help="show the batches and what is already done")
     parser.add_argument("--dry-run", action="store_true")
@@ -100,7 +100,12 @@ def main():
                       + (f"  next: {todo[0]}" if todo else "  complete"))
         return
 
-    jobs = [j for name in args.batch for j in BATCHES[name]]
+    names = list(BATCHES) if "all" in args.batch else args.batch
+    unknown = [n for n in names if n not in BATCHES]
+    if unknown:
+        parser.error(f"unknown batch(es) {unknown}; choose from "
+                     f"'all' or {list(BATCHES)}")
+    jobs = [j for name in names for j in BATCHES[name]]
     if args.epochs:
         for job in jobs:
             job.epochs = args.epochs
@@ -156,7 +161,23 @@ def main():
             else:
                 print(f"   FAILED: {entry.get('error')}")
 
-        print(f"== {job.name} written to {job.out_path}")
+        print(f"== {job.name} written to {job.out_path}", flush=True)
+
+    print()
+    print("=" * 60)
+    print("QUEUE FINISHED")
+    for job in jobs:
+        done = load(job.out_path) or {"arms": {}}
+        have = {f"{a}/{s}" for a, seeds in done["arms"].items() for s in seeds}
+        failed = [f"{a}/{s}" for a, seeds in done["arms"].items()
+                  for s, entry in seeds.items() if "error" in entry]
+        want = [f"{a}/{s}" for a in job.arms for s in job.seeds]
+        missing = [w for w in want if w not in have]
+        status = "complete" if not missing and not failed else (
+            f"{len(want) - len(missing)}/{len(want)} done"
+            + (f", {len(failed)} failed" if failed else ""))
+        print(f"  {job.name:<22} {status}")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
