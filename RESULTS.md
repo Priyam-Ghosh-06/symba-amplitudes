@@ -16,12 +16,15 @@ python scripts/report.py results/*.json --markdown --out RESULTS.md
 ## Headline
 
 Both theories at 120 epochs, full canonical target, free-running beam decode.
+**Mean over three seeds** — a seed changes both the weight initialisation and
+the split, so a single run is not the result.
 
-| | QED (n=47) | QCD (n=14) |
+| | QED | QCD |
 |---|---|---|
-| **model, symbolic exact match** | **83.0%** [70, 91] | **100.0%** [78, 100] |
-| template oracle (retrieval ceiling) | 70.2% | 50.0% |
-| 1-NN character n-gram retrieval | 21.3% | 14.3% |
+| **model, symbolic exact match** | **84.6%** (sd 4.1) | **96.5%** (sd 2.9) |
+| per-seed values | 83.0 / 80.6 / 90.3 | 100.0 / 92.9 / 96.8 |
+| template oracle (retrieval ceiling) | 70.2% | 50.0-78.6% |
+| 1-NN character n-gram retrieval | 21.3% | 14.3-25.0% |
 | most frequent / exact lookup | 0.0% | 0.0% |
 | parse validity | 100% | 100% |
 | mass-dimension-4 validity | 100% | 100% |
@@ -99,14 +102,21 @@ The split the objective asks for, and the one comparable to prior work.
 
 ### Reading this honestly
 
-- **QCD 100% is 14 out of 14.** The interval is [78, 100]. It says the model is
-  very good on this split, not that it is perfect; one more test record could
-  make it 93%. The QCD test set is small because the corpus is 234 records over
-  11 template classes.
-- **Both pathways beat either alone on QCD**: 100.0 against 85.7 for
-  `math_only` and 85.7 for `graph_only`. This is the clearest support for
-  Claim 1 in the whole table, and unlike the 30-epoch version it is a real gap
-  rather than a tie.
+- **The QCD 100% was one seed of three.** On seed 0 it is 14/14; the other two
+  seeds give 92.9% and 96.8%, so the honest figure is 96.5% (sd 2.9). Do not
+  quote the 100%.
+- **Claim 1 holds on both theories, and only multiple seeds showed it.**
+  Mean symbolic EM over three seeds:
+
+  | | graph only | AST only | graph + AST |
+  |---|---|---|---|
+  | QED | 51.6 (sd 12.9) | 72.6 (sd 1.6) | **84.6** (sd 4.1) |
+  | QCD | 86.3 (sd 2.2) | 91.8 (sd 4.6) | **96.5** (sd 2.9) |
+
+  Monotone on both, and on QED the gaps are several times the seed spread.
+  On seed 0 alone QCD looked like a tie between the single-modality arms
+  (85.7 / 85.7); across three seeds the ordering is consistent. This is the
+  strongest result in the project and it is the one the proposal is about.
 - **No QED arm separates from another.** 78.7 to 83.0 across `vanilla`,
   `xsa_proj`, `xsa_mask` and `moe`, with intervals ~22 points wide, all
   overlapping. That is exactly what docs/03 SS7 predicted for both XSA

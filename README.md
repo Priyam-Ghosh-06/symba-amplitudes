@@ -33,11 +33,12 @@ live in [`docs/`](docs/).
 
 ## Results
 
-QED **83.0%** symbolic exact match [70, 91] against a 70.2% retrieval ceiling
-and a 21.3% 1-NN baseline. QCD **100%** [78, 100] on n=14, against a 50.0%
-ceiling. Parse validity and mass-dimension validity are 100% throughout. Under
-a template split, where whole functional forms are held out, the model and
-every baseline score **0%**. See [RESULTS.md](RESULTS.md).
+Mean over three seeds: QED **84.6%** symbolic exact match (sd 4.1), QCD
+**96.5%** (sd 2.9), against 1-NN retrieval baselines of 21% and 14-25%. Parse
+validity and mass-dimension validity are 100% throughout. Both pathways beat
+either alone on both theories, which is the project's Claim 1. Under a template
+split, where whole functional forms are held out, the model and every baseline
+score **0%**. See [RESULTS.md](RESULTS.md) and [figures/](figures/).
 
 ## Quick start
 
@@ -70,6 +71,14 @@ python scripts/run_queue.py --list
 ```bash
 python scripts/report.py results/*.json
 ```
+
+```bash
+python scripts/plots.py
+```
+
+Six figures land in `figures/`: the headline against its baselines, protocol A
+vs B, the modality ablation, learning curves, an error decomposition, and seed
+variance against architecture variance.
 
 **4. Predict with a trained checkpoint.**
 
