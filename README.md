@@ -1,278 +1,268 @@
-# Physics-Informed Models for Squared Amplitude Calculation
+# Learning to Square Amplitudes
 
 Structure-aware sequence models that predict the squared amplitude
-$\overline{|\mathcal{M}|^2}$ from a Feynman diagram and its amplitude, for the
-SYMBA / ML4SCI project.
-
-The map being learned is exactly deterministic — there is one right answer and
-it is computable. The difficulty is not in the physics but in the *encoding*:
-MARTY emits nested, unsimplified, dummy-index-laden strings, and a
-sequence model asked to reproduce them byte for byte is being handed a lossy,
-redundant, non-canonical version of a function it could otherwise be given
-cleanly. This repository is built around that observation.
+$\overline{|\mathcal{M}|^2}$ from a Feynman diagram and its amplitude.
 
 ---
 
-## What is here
+## The problem
 
-| stage | module | what it does |
-|---|---|---|
-| S1 | `symba/data/load.py` | parse and validate; 4 fields, 4 external legs, one record per non-blank line |
-| S2 | `symba/data/normalize.py` | dummy-index normalisation, keyword stripping |
-| S3 | `symba/data/canonical.py` | sympy canonicalisation of the target + mass-dimension check |
-| S4 | `symba/data/ast_parse.py`, `graph.py` | Lark LALR grammar → AST; Feynman diagram → edge list |
-| S5 | `symba/data/serialize.py` | typed prefix serialisation, and its inverse |
-| S6 | `symba/data/vocab.py` | vocabulary from the **training split only** |
-| — | `symba/data/dataset.py` | dynamic padding, padding masks, no truncation |
-| S7 | `symba/model/` | dual-pathway encoders + cross-attention decoder |
-| S8 | `symba/eval/decode.py` | beam search with length normalisation and grammar constraints |
-| S9 | `symba/eval/metrics.py`, `baselines.py` | the seven metrics, and the baselines they must beat |
+Every prediction a collider experiment tests starts life as a cross section,
+and every cross section starts as a squared amplitude. You draw the diagrams,
+write down the amplitude $\mathcal{M}$, square it, and sum over the spins and
+colours you cannot observe. The physics of that step is settled — it has been
+since the 1940s. The difficulty is that it is *enormous*.
 
-Design rationale, the bug list this replaces, and the argument for each change
-live in [`docs/`](docs/).
+Squaring a sum of $d$ diagrams gives $d^2$ interference terms. Each carries
+Dirac traces, colour factors, and a swarm of contracted indices. Computer
+algebra systems do this exactly and reliably, and they are the reason modern
+phenomenology is possible at all — but their cost climbs steeply with external
+legs and loop order, and the answer to one process tells them nothing about the
+next. Every new final state pays full price.
 
-## Results
+So the question is a natural one: the map from amplitude to squared amplitude is
+a *function*. Deterministic, total, exactly verifiable. Could a model simply
+learn it?
 
-Mean over three seeds: QED **84.6%** symbolic exact match (sd 4.1), QCD
-**96.5%** (sd 2.9), against 1-NN retrieval baselines of 21% and 14-25%. Parse
-validity and mass-dimension validity are 100% throughout. Both pathways beat
-either alone on both theories, which is the project's Claim 1. Under a template
-split, where whole functional forms are held out, the model and every baseline
-score **0%**. See [RESULTS.md](RESULTS.md) and [figures/](figures/).
+That verifiability is worth pausing on. Most of machine learning works in
+domains where the ground truth is a human label and "correct" is a matter of
+degree. Here there is exactly one right answer, it is a mathematical object, and
+we can check any prediction against it in closed form. That is a rare luxury,
+and — as it turns out — an easy one to squander.
 
-## Quick start
+## How this is generally approached
+
+The natural framing is translation. Take the amplitude as a string of
+characters, take the squared amplitude as another string, and train a
+sequence-to-sequence transformer to map one to the other. Tokenize at the byte
+or character level, cap both sides at a fixed length, split the dataset
+randomly, and report the fraction of test expressions the model reproduces
+exactly.
+
+It works better than it has any right to. Reported accuracies for tree-level
+QED and QCD processes sit high enough that the approach is clearly onto
+something real. The model is not memorising; it is picking up genuine structure
+in how amplitudes square.
+
+The trouble is what that number is a number *of*.
+
+## Where that framing leaks
+
+Six problems, each measured on this corpus rather than asserted.
+
+**The target is a string, not a function.** Symbolic engines emit one
+particular rendering of an answer out of infinitely many equivalent ones —
+unexpanded, uncancelled, nested. Scoring on string equality marks a correct
+answer wrong for writing itself differently. In the QCD corpus, **19 raw target
+strings are algebraically identical to another raw string**. String matching
+does not just fail to reward correct answers; it actively penalises them.
+
+**The expressions are long, and fixed budgets truncate them.** QCD amplitudes
+reach 4,734 characters and their targets 2,872. Against the byte caps in
+ordinary use, **100% of amplitudes and 100% of targets were being cut off** in
+both theories. A model trained that way is not learning to square an amplitude.
+It is learning to guess the first 63 bytes of one.
+
+**Byte-level tokenization throws away a grammar you already have.** These
+strings are not natural language; they are generated by a parser and obey one.
+A 260-symbol byte vocabulary spends its capacity rediscovering that `(` closes,
+that `%\sigma_18923` is one dummy index rather than twelve characters, and that
+`^` takes two arguments.
+
+**Splitting by record measures the wrong thing.** Map each mass symbol to the
+leg it belongs to and canonicalise, and the corpus collapses: **360 QED records
+become 30 distinct functions; 234 QCD records become 11.** Under a random
+record-level split, essentially every test record's functional form has already
+been seen in training, and only the flavour labels are new. That is substitution
+within a known template — a real skill, and worth having — but it is not
+computing an amplitude, and a single accuracy figure cannot tell the two apart.
+
+**The physics is sitting right there, unused.** Every numerator in both corpora
+is mass-dimension homogeneous of degree exactly 4 — **360/360 and 234/234, no
+exceptions.** That is a free, exact, checkable constraint on every output the
+model can produce, and the standard framing neither enforces nor measures it.
+
+**One number is not a diagnosis.** When a model scores 83%, the interesting
+question is what the other 17% looks like. Did it choose the wrong propagator
+channel — wrong physics? Or the right structure with a wrong coefficient —
+wrong arithmetic? Those call for different fixes, and a single percentage
+cannot distinguish them.
+
+## The approach here
+
+The through-line: **stop asking the model to reproduce a string, and start
+asking it for the object the string denotes.** Almost everything else follows.
+
+**Predict the function.** Targets are canonicalised — expanded, put over a
+common denominator, cancelled — before anything sees them. This costs nothing
+and buys a great deal: QCD's worst-case target falls from 2,872 characters to
+258, its 90th percentile falls tenfold, and those 19 duplicate answers merge
+into one. It turns out that taking a computer algebra system entirely at its
+word means taking rather a lot of them.
+
+**Serialise into the grammar, not around it.** Targets become typed prefix
+(Polish) token streams: no brackets to balance, digits split so that a
+coefficient of any size costs a bounded vocabulary, and every token tagged with
+its grammatical type. The result is a **~30-symbol vocabulary where a byte-level
+scheme needs 260, and a 160-token budget that covers 100% of both corpora** —
+against a 63-byte cap that covered none of it.
+
+**Give the model the diagram, not just the algebra.** Two encoders: one over the
+Feynman graph as a resolved edge list — which vertices, which propagator joins
+them — and one over the amplitude's abstract syntax tree. Topology and algebra
+answer different questions, and the denominator channel is a question about
+topology.
+
+**Exploit the sum over diagrams.** An amplitude is a sum, and cross-attention
+over a set of keys is permutation-invariant, so each diagram is encoded
+separately under shared weights and the decoder attends over all of them at
+once. Attention cost goes from $(\sum_d L_d)^2$ to $\sum_d L_d^2$: on QCD the
+longest attended sequence drops from **2,859 tokens to 241**, and encoder
+attention work falls **10.7×**. The permutation invariance is not a trick — it
+is a property the physics already had.
+
+**Make invalid output unrepresentable.** Decoding is grammar-constrained: at
+each step, any token that cannot legally continue the prefix is masked before
+the softmax. A syntactically malformed answer stops being something to measure
+and starts being something that cannot happen.
+
+**Turn physics into a metric.** Mass-dimension-4 homogeneity is checked on every
+prediction. This is where it earns its keep — under a held-out-template split,
+QED output was **98.8% well-formed and 0% dimensionally consistent.** Asked for
+a formula it had never seen, the model wrote fluent, grammatical,
+physically impossible nonsense. It had the accent down and not a word of the
+language. No aggregate accuracy number would have told you that.
+
+**Report two splits, always together.** Protocol A splits by record — the
+interpolation number, comparable to prior work. Protocol B holds out whole
+functional forms — the generalisation number. They differ enormously, and that
+gap *is* the result rather than an embarrassment to be buried.
+
+**Decompose the error.** Symbolic exact match now factorises as
+`structure × coefficient`: did it find the right functional form, and given
+that, did it get the numbers right? On every seed measured so far the variance
+lives almost entirely in the first factor. Finding the form is the hard part;
+the arithmetic, once the form is right, mostly takes care of itself.
+
+**Gate everything.** 47 tests stand between the raw corpus and any number this
+repository produces. Two of them exist because "the decoder cannot see the
+target during inference" should be a falsifiable property, not a code-reading
+exercise. Others assert that vocabularies never see held-out data, that splits
+are disjoint, that a run is a function of its config and seed, and that the
+metrics are what they claim to be.
+
+## Status
+
+The pipeline is verified — `python tests/test_gates.py` → 47/47.
+
+**Model results are being regenerated and `RESULTS.md` should not be quoted
+until they are.** A correctness pass found several harness defects that move
+the numbers, including one that made runs depend on their position in a job
+rather than on their seed. The fixes are in; the reruns are not. The full
+account is in [`docs/04_change_review.md`](docs/04_change_review.md), including
+two earlier conclusions that were withdrawn under review.
+
+Everything cited above is a measurement of the *corpus*, not of a model, and is
+unaffected.
+
+## Repository
+
+```
+symba/
+  config.py          every knob; a run is this dataclass tree plus a seed
+  experiment.py      ARMS: named single-factor overrides, so a difference is attributable
+  data/
+    load.py          S1  parse and validate — 4 fields, 4 legs, no fallback records
+    normalize.py     S2  dummy-index normalisation, keyword stripping
+    canonical.py     S3  the target definition, and the mass-dimension invariant
+    ast_parse.py     S4a Lark LALR grammar → prefix AST; per-diagram segmentation
+    graph.py         S4b vertices → Feynman edge list, propagators resolved
+    serialize.py     S5  typed prefix serialisation and its exact inverse
+    vocab.py         S6  vocabulary, built from the training split only
+    splits.py        template classes; protocol A and protocol B
+    dataset.py       tensors, dynamic padding, length-bucketed sampling
+    pipeline.py      build() — the one route from raw line to tensor
+  model/
+    embed.py         token + type + positional; role-filler and TPR arms
+    attention.py     vanilla | xsa_proj | xsa_mask
+    ffn.py           dense | MoE with load balancing and utilisation logging
+    model.py         dual-pathway encoders, cross-attention decoder
+  train/loop.py      training; selection on free-running symbolic EM
+  eval/
+    decode.py        beam search, length normalisation, grammar constraints
+    metrics.py       the metric suite and its decomposition
+    baselines.py     most-frequent, exact lookup, 1-NN, template oracle
+tests/test_gates.py  the 47 gates
+scripts/             run_experiment (one job), run_queue (a batch), report, predict, plots
+docs/                00 orientation · 01 design · 02 defects · 03 proposals · 04 change review
+```
+
+Two files carry the conceptual weight: `data/canonical.py` decides what the
+answer *is*, and `data/splits.py` decides what the question *is*. The rest is
+machinery.
+
+Start with [`docs/00_orientation.md`](docs/00_orientation.md) — it maps every
+number to the file that produced it.
+
+## Running it
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**1. Verify the pipeline.** The gate tests are the reason to trust anything
-below; nothing else should be run until they pass.
+The gates come first. Nothing below is worth running until they pass.
 
 ```bash
 python tests/test_gates.py
 ```
 
-**2. Train.** Jobs run one at a time and any `(arm, seed)` already in the
-output file is skipped, so an interrupted batch resumes rather than restarts.
+Train a batch. Jobs run sequentially and any `(arm, seed)` already present in
+the output is skipped, so an interrupted run resumes instead of restarting.
 
 ```bash
 python scripts/run_queue.py --batch core
 ```
 
-See what a batch will do, or what is already done:
-
-```bash
-python scripts/run_queue.py --list
-```
-
-**3. Read the results.**
+Read the results.
 
 ```bash
 python scripts/report.py results/*.json
 ```
 
-```bash
-python scripts/plots.py
-```
-
-Six figures land in `figures/`: the headline against its baselines, protocol A
-vs B, the modality ablation, learning curves, an error decomposition, and seed
-variance against architecture variance.
-
-**4. Predict with a trained checkpoint.**
+Predict with a trained checkpoint.
 
 ```bash
 python scripts/predict.py --list
 ```
 
-```bash
-python scripts/predict.py --checkpoint checkpoints/QCD_record_long__full_vanilla_dense__seed0.pt --input data/Symba/QCD/QCD-2-to-2-diag-TreeLevel-0.txt --limit 5
-```
-
-Every finished run writes `checkpoints/<job>__<arm>__seed<n>.pt`, carrying the
-weights, the config, the three vocabularies and the sequence lengths — enough
-to rebuild the model and reproduce its decoding with no access to the training
-data. `scripts/predict.py` applies the identical S2–S5 preprocessing, and when
-the input line carries a ground-truth `sq_amp` it scores the prediction with
-the same symbolic-equivalence test used in training.
-
----
-
-## The five changes that matter
-
-### 1. The model is actually fed the parsed representations
-
-The previous pipeline built the AST, built the graph, printed shape assertions
-for both — and then constructed its tensors from the **raw infix strings**:
-
-```python
-graph_str  = item.get('vertices', '')   # raw
-math_str   = item.get('amp',      '')   # raw
-target_str = item.get('sq_amp',   '')   # raw
-```
-
-with loaders built from the un-cleaned record lists. Nothing the grammar or the
-graph builder produced ever reached the network. Every claim resting on
-algebraic hierarchy or interaction topology was **untested — not disproved,
-untested**.
-
-Gate `G9` now asserts the wiring directly: perturb the raw `amp` field and the
-model input must not change; perturb `amp_tokens` and it must.
-
-### 2. Nothing is truncated
-
-The old budgets were 120 / 168 / **65** bytes. Measured against them, **100% of
-amplitudes and 100% of targets were truncated in both theories** — the reported
-"exact match" was exact match on the first ~63 characters.
-
-Canonicalising the target removes the length problem rather than clipping it:
-
-| | raw median / p90 / max | canonical median / p90 / max |
-|---|---|---|
-| QED `sq_amp` | 127 / 205 / 210 | 201 / 212 / 221 |
-| QCD `sq_amp` | 421 / 2409 / **2872** | 205 / 247 / **258** |
-
-QCD's tail was MARTY emitting unsimplified output, not intrinsic complexity.
-Serialised as typed prefix, the target has a **31-symbol vocabulary (QED) / 30
-(QCD)** and a maximum of **103 / 134 tokens** — measured on this corpus by
-`tests/test_gates.py`. Sequences over budget raise; they are never clipped.
-
-### 3. The graph is a graph
-
-`OffShell A(V_1)` inside vertex `V_1` was matched against its own vertex,
-producing the self-loop `('V_1','V_1','A')`. The internal line joining the two
-vertices — the thing that determines the denominator channel — was never
-represented, so the "topology" pathway encoded two disconnected vertex bags.
-
-Propagators are now resolved by matching the off-shell particle type *across*
-vertices, giving a real edge with distinct endpoints. All 594 records build a
-connected graph (`G6`).
-
-### 4. Honest evaluation
-
-- **Three disjoint splits.** The old code used the test set as the validation
-  set for early stopping, checkpointing, and reporting.
-- **Free-running metrics only.** The old per-epoch "exact match" was
-  teacher-forced — the ground-truth prefix was fed in at every step. That number
-  is logged here but is never called exact match.
-- **Reported at the selected checkpoint**, not as a maximum over epochs of a
-  test statistic on n = 36.
-- **Selection on symbolic exact match**, not on cross-entropy. With
-  $\varepsilon = 0.1$ smoothing the loss floor is 0.8778 and the old run reached
-  0.8828: the selection signal was $5\times10^{-3}$ wide while exact match was
-  still climbing.
-- **Wilson intervals everywhere**, because n is 36 and 24.
-- **Baselines reported alongside every number**: most-frequent, exact lookup,
-  1-NN character n-gram retrieval, and a template oracle.
-
-### 5. Constrained decoding
-
-The target vocabulary is ~30 symbols with known operator arities, so the set of
-legal next tokens is computable from the decoder's own prefix state. Any token
-that cannot complete a well-formed expression within the remaining length budget
-is masked. **Parse validity is 100% by construction**, and whole classes of
-error become unreachable.
-
----
-
-## Why the numbers will look different
-
-This corpus is much smaller than it appears. Mapping each mass symbol to the leg
-index of its first occurrence and canonicalising collapses it to:
-
-| | records | distinct raw targets | **distinct template classes** |
-|---|---|---|---|
-| QED | 360 | 162 | **30** |
-| QCD | 234 | 118 | **11** |
-
-(Both counts are reproduced by this pipeline; see `symba/data/splits.py`.)
-
-Under a random record-level split, essentially every test record belongs to a
-template seen in training, so that number measures *substitution within a seen
-template*. A 1-NN retriever with no training at all is a strong baseline on it.
-Two split protocols are therefore reported together:
-
-- **Protocol A (record)** — the headline number, comparable to prior work.
-- **Protocol B (template)** — whole functional forms held out. The honest
-  generalisation number.
-
-They will differ substantially. That gap is a result, not an embarrassment.
-
-Note also that removing truncation and switching to the canonical target
-**makes the task harder**: the model now has to emit a complete ~100-token
-expression instead of the first 63 bytes of one. A lower number than the old
-notebooks reported is expected and is not a regression — the old number was
-measuring something else.
-
----
-
-## Repository layout
-
-```
-symba/
-  config.py            one dataclass tree; a run is config + seed
-  data/                S1-S6, plus splits and the tensor pipeline
-  model/               embeddings, attention arms, FFN arms, the model
-  train/               loop, schedule, selection
-  eval/                decode, metrics, baselines
-scripts/               run_experiment.py (one job), run_queue.py (a batch),
-                       report.py (tables), predict.py (inference), plots.py
-tests/test_gates.py    the gate table of docs/01 SS7, plus the leak and
-                       metric gates added since
-notebooks/             the original exploratory notebooks, kept for provenance
-data/Symba/            QED and QCD tree-level corpora
-docs/                  00 orientation (read first), 01 architecture design,
-                       02 bug list, 03 proposed changes, 04 change review
-```
-
-Notebooks import; they do not define. Everything that was a notebook cell is a
-module with a test.
-
 ## Ablation arms
 
-An **arm** is a named set of config overrides in `symba/experiment.py`, nothing
-more — `capacity_256` is literally `{"model.d_model": 256,
-"model.dim_feedforward": 1024}`. Each arm differs from the control in exactly
-one factor, so a difference in the result is attributable to that factor
-(docs/01 P4). Select them with `--arms`; the control is always
-`full_vanilla_dense`.
+An **arm** is a named set of config overrides in `symba/experiment.py` — nothing
+more. `capacity_256` is literally
+`{"model.d_model": 256, "model.dim_feedforward": 1024}`. Each differs from the
+control in exactly one factor, so a difference in the result is attributable to
+that factor.
 
 | arm | what it changes |
 |---|---|
-| `full_vanilla_dense` | control: both pathways, standard attention, dense FFN |
+| `full_vanilla_dense` | the control: both pathways, standard attention, dense FFN |
 | `graph_only` / `math_only` | modality ablation — the pathway is *not built*, not zeroed |
-| `full_xsa_proj_dense` | XSA as implemented previously: project the output off its own value vector |
-| `full_xsa_mask_dense` | XSA as *argued* previously: mask the attention diagonal before softmax |
-| `full_vanilla_moe` | MoE FFN with load-balancing loss and utilisation logging |
+| `full_xsa_proj_dense` | exclusive self-attention as usually implemented: project the output off its own value vector |
+| `full_xsa_mask_dense` | exclusive self-attention as usually *argued*: mask the attention diagonal before the softmax |
+| `full_vanilla_moe` | mixture-of-experts FFN, load-balanced and instrumented |
 | `capacity_64` / `capacity_256` | capacity sweep |
-| `no_type_embedding` | removes the grammar-derived type channel |
+| `no_type_embedding` | drops the grammar-derived type channel |
 | `role_filler` / `tpr_binding` | additive vs multiplicative role binding |
-| `unconstrained_decode` | grammar constraints off — isolates their contribution |
-| `raw_target` | raw MARTY string instead of the canonical form |
-| `no_segmentation` | forces the whole amplitude through one encoder pass |
-| `raw_amp` | the physics-free control: amplitude characters, no grammar |
+| `unconstrained_decode` | grammar constraints off, to isolate their contribution |
+| `raw_target` | the uncanonicalised string, to price the central design decision |
+| `no_segmentation` | the whole amplitude through one encoder pass |
+| `raw_amp` | the physics-free control: characters, no grammar |
 
-The two XSA arms are separate on purpose: projecting the output off its own
-value vector and masking the attention diagonal are different operators, and the
-motivation given for XSA describes the second while the previous code
-implemented the first.
-
-## Known limitations
-
-- **QCD amplitudes are long.** The input AST reaches 2861 tokens (a sum over
-  diagrams), so QCD runs are far slower than QED. Per-diagram encoding
-  (`data.segment_amp`) is implemented and on by default under `"auto"`, which
-  measures whether it pays: it does on QCD (longest attended sequence 2859 ->
-  241) and does not on QED, whose amplitudes are short enough that padding the
-  segment rectangle costs more than the attention it saves.
-- **MoE is expected to do nothing here.** 324 examples against 30 target
-  functions — capacity is not the binding constraint. It is instrumented so the
-  claim can be *measured* rather than asserted.
-- **The structured head is not implemented.** Predicting the denominator
-  channel, monomial support, and coefficients directly is likely the largest
-  remaining accuracy win, especially on QCD.
-- Trained on CPU at small capacity; the numbers are not a scaling result.
+The two exclusive-self-attention arms are separate on purpose. Projecting an
+output off its own value vector and masking the attention diagonal are different
+operators, and the usual motivation describes the second while the usual
+implementation does the first. Testing a claim against the wrong operator is a
+good way to learn nothing twice.
 
 ## License
 
