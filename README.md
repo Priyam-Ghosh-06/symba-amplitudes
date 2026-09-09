@@ -216,11 +216,14 @@ symba/
   model/               embeddings, attention arms, FFN arms, the model
   train/               loop, schedule, selection
   eval/                decode, metrics, baselines
-scripts/               run_experiment.py, report.py, overnight_*.sh
-tests/test_gates.py    the fourteen gates of docs/01 SS7
+scripts/               run_experiment.py (one job), run_queue.py (a batch),
+                       report.py (tables), predict.py (inference), plots.py
+tests/test_gates.py    the gate table of docs/01 SS7, plus the leak and
+                       metric gates added since
 notebooks/             the original exploratory notebooks, kept for provenance
 data/Symba/            QED and QCD tree-level corpora
-docs/                  architecture design, bug list, proposed changes
+docs/                  00 orientation (read first), 01 architecture design,
+                       02 bug list, 03 proposed changes, 04 change review
 ```
 
 Notebooks import; they do not define. Everything that was a notebook cell is a
@@ -228,7 +231,12 @@ module with a test.
 
 ## Ablation arms
 
-Selected with `--arms`; each differs from the control in one factor.
+An **arm** is a named set of config overrides in `symba/experiment.py`, nothing
+more — `capacity_256` is literally `{"model.d_model": 256,
+"model.dim_feedforward": 1024}`. Each arm differs from the control in exactly
+one factor, so a difference in the result is attributable to that factor
+(docs/01 P4). Select them with `--arms`; the control is always
+`full_vanilla_dense`.
 
 | arm | what it changes |
 |---|---|
@@ -242,6 +250,8 @@ Selected with `--arms`; each differs from the control in one factor.
 | `role_filler` / `tpr_binding` | additive vs multiplicative role binding |
 | `unconstrained_decode` | grammar constraints off — isolates their contribution |
 | `raw_target` | raw MARTY string instead of the canonical form |
+| `no_segmentation` | forces the whole amplitude through one encoder pass |
+| `raw_amp` | the physics-free control: amplitude characters, no grammar |
 
 The two XSA arms are separate on purpose: projecting the output off its own
 value vector and masking the attention diagonal are different operators, and the
@@ -251,8 +261,11 @@ implemented the first.
 ## Known limitations
 
 - **QCD amplitudes are long.** The input AST reaches 2861 tokens (a sum over
-  diagrams), so QCD runs are far slower than QED. Per-diagram encoding is the
-  principled fix and is not implemented yet.
+  diagrams), so QCD runs are far slower than QED. Per-diagram encoding
+  (`data.segment_amp`) is implemented and on by default under `"auto"`, which
+  measures whether it pays: it does on QCD (longest attended sequence 2859 ->
+  241) and does not on QED, whose amplitudes are short enough that padding the
+  segment rectangle costs more than the attention it saves.
 - **MoE is expected to do nothing here.** 324 examples against 30 target
   functions — capacity is not the binding constraint. It is instrumented so the
   claim can be *measured* rather than asserted.

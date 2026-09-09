@@ -1,5 +1,15 @@
 # Results
 
+> **Stale as of the pipeline-correctness pass.** Every number below was
+> produced before four changes that alter the training trajectory or the
+> encoder input: per-epoch re-bucketing in the length sampler, length budgets
+> derived from the training split alone, the amplitude vocabulary built over
+> `amp_segments` (which removes an `<unk>` the QCD encoder was fed in all 234
+> records), and the `coefficient_exact` / `sequence_exact_match` metric
+> corrections. The metric changes do not move symbolic EM; the other three do.
+> These tables stand as the last consistent set and must be regenerated before
+> any of them is quoted again.
+
 All numbers are **free-running** decoding (no teacher forcing), at the
 checkpoint selected on a **validation split disjoint from test**, with 95%
 Wilson intervals. Nothing here is a maximum over epochs.
@@ -171,24 +181,32 @@ is not implemented.
 
 Honest gaps, in rough order of how much they would change the picture:
 
-- **Seed replication.** Every number above is one seed. Three seeds minimum
-  before any arm comparison means anything (docs/01 SS6.4), and with intervals
-  this wide the QED arm ordering is currently noise. Running
-  (`--batch seeds`).
+- **Seed replication beyond the control.** The headline and the modality
+  ablation are three-seed means; every *other* arm in the protocol-A table is
+  still a single seed, and with intervals ~22 points wide the QED arm ordering
+  is noise (`--batch seeds`).
 - **The capacity sweep.** `capacity_64` / `capacity_256`, plus
   `no_type_embedding`, `role_filler` and `tpr_binding`, have not been run at
   120 epochs (`--batch capacity`).
 - **A QCD test set worth the name.** n=14 makes 100% and 93% indistinguishable.
 - **Leave-one-template-out**, which would give protocol B an n equal to the
   class count instead of a single arbitrary grouping.
+- **Where the remaining errors actually are.** `coefficient_exact` was
+  defined as `equal and same_monomials`, which `equal` already implies, so it
+  reproduced symbolic EM in all 46 runs above and decomposed nothing. It now
+  reports the rate *conditional* on the structure being right, alongside a new
+  `structure_exact`. Until the runs are regenerated, the split between "wrong
+  functional form" and "wrong coefficient" is unknown.
 - **The structured head** (docs/03 §2.3) — predicting denominator channel,
   monomial support, and coefficients directly. Given that channel accuracy is
   already 91.5% while full symbolic EM is 83.0%, the remaining errors are in the
   numerator, which is what that head targets.
 - **NTK / CKA measurements** (docs/03 §4.4), which would let architecture
   claims be made on 277 training points instead of a 47-record test set.
-- **Per-diagram encoding for QCD** (docs/01 §4.2), which is what makes the
-  2861-token amplitude tractable.
+- **Per-diagram encoding as a controlled arm.** It is implemented and its
+  cost saving is measured (see "What actually mattered", item 3), but
+  `no_segmentation` has never been run against the control at equal epochs, so
+  its effect on *accuracy* — as opposed to speed — is unmeasured.
 
 ## Reproducing
 

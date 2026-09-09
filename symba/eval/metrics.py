@@ -56,9 +56,67 @@ def bailout_count() -> int:
 
 
 
+# Upper bound on the monomial count of expand(expr) that is still worth
+# computing. Reference numerators carry at most 8 monomials, so this is three
+# orders of magnitude of slack for a prediction that could still be right.
+TERM_CAP = 2000
+
+
+def expansion_terms(expr, cap: int = TERM_CAP) -> int:
+    """Upper bound on the number of monomials in ``expand(expr)``.
+
+    ``count_ops`` bounds the size of the *written* expression, which does not
+    bound the cost of expanding it: a product of k binomials has ``count_ops``
+    11 for every k while its expansion grows as 2**k, and OPERATOR_SLACK
+    permits roughly k = 60. So the old cap never bound the quantity that
+    actually blows up.
+
+    One pass over the tree, short-circuited as soon as the bound passes ``cap``,
+    so the pathological case is the cheap case. A negative integer power is a
+    single factor - ``expand`` does not distribute over 1/(a + b) - so it
+    counts as one term rather than recursing into the base.
+    """
+    if expr.is_Atom:
+        return 1
+    if expr.is_Add:
+        total = 0
+        for arg in expr.args:
+            total += expansion_terms(arg, cap)
+            if total > cap:
+                return total
+        return total
+    if expr.is_Mul:
+        total = 1
+        for arg in expr.args:
+            total *= expansion_terms(arg, cap)
+            if total > cap:
+                return total
+        return total
+    if expr.is_Pow:
+        base, exponent = expr.as_base_exp()
+        if not exponent.is_Integer:
+            return cap + 1
+        power = int(exponent)
+        if power < 0:
+            return 1
+        base_terms = expansion_terms(base, cap)
+        if base_terms <= 1:
+            return 1
+        total = 1
+        for _ in range(power):
+            total *= base_terms
+            if total > cap:
+                return total
+        return total
+    return 1
+
+
 def _too_complex(expr) -> bool:
     try:
         if sympy.count_ops(expr) > COMPLEXITY_CAP:
+            _bailouts["count"] += 1
+            return True
+        if expansion_terms(expr) > TERM_CAP:
             _bailouts["count"] += 1
             return True
     except Exception:
@@ -101,7 +159,17 @@ def _as_fraction(expr):
     if key in _FRACTION_CACHE:
         return _FRACTION_CACHE[key]
     try:
-        numerator, denominator = sympy.fraction(sympy.together(expr))
+        # ``cancel`` matters, and its absence was a real defect. The reference
+        # is built by canonical.py as expand -> together -> cancel; a
+        # prediction was only put through ``together``. A prediction that is
+        # algebraically equal but not in lowest terms - say
+        # (s_12^2 - s_13^2) / ((s_12 - s_13) * s_14) against
+        # (s_12 + s_13) / s_14 - then kept a denominator the reference does
+        # not have, and scored ``equal`` while failing the channel test. That
+        # broke the identity symbolic EM = structure x coefficient downward.
+        # Normalising both sides the same way is the fix.
+        numerator, denominator = sympy.fraction(
+            sympy.cancel(sympy.together(expr)))
         result = (sympy.expand(numerator), sympy.expand(denominator))
     except Exception:
         result = (None, None)
@@ -136,6 +204,26 @@ def _denominator_of(expr):
     return _as_fraction(expr)[1]
 
 
+def same_channel(pred_expr, ref_expr) -> bool:
+    """Do the two denominators describe the same propagator channel?
+
+    Projective, not literal: a channel is a set of poles, so denominators that
+    differ by a non-zero scalar are the same channel. ``2*s_14`` and ``s_14``
+    are one channel written two ways, and a strict ``expand(Dp - Dr) == 0``
+    called that a miss.
+    """
+    dp, dr = _denominator_of(pred_expr), _denominator_of(ref_expr)
+    if dp is None or dr is None:
+        return False
+    try:
+        if sympy.expand(dp - dr) == 0:
+            return True
+        ratio = sympy.cancel(dp / dr)
+        return bool(ratio.is_number) and ratio != 0
+    except Exception:
+        return False
+
+
 def _monomial_set(expr):
     numerator, _d = _as_fraction(expr)
     if numerator is None:
@@ -151,13 +239,13 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
     already stripped).
     """
     raw_em, symbolic_em, well_formed, dim_ok = [], [], [], []
-    channel_ok, monomial_f1, coeff_ok = [], [], []
+    channel_ok, monomial_f1 = [], []
+    structure_ok, coeff_given_structure = [], []
     per_class = defaultdict(list)
     bailouts_before = bailout_count()
 
     for i, (pred, ref) in enumerate(zip(predictions, references)):
-        raw_match = pred == ref
-        raw_em.append(raw_match)
+        raw_em.append(pred == ref)
 
         # Well-formedness is decided syntactically, with no sympy involved.
         well_formed.append(is_well_formed(pred))
@@ -179,7 +267,7 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
             dim_ok.append(False)
             channel_ok.append(False)
             monomial_f1.append(0.0)
-            coeff_ok.append(False)
+            structure_ok.append(False)
         else:
             equal = symbolically_equal(pred_expr, ref_expr)
             symbolic_em.append(bool(equal))
@@ -191,11 +279,7 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
             except Exception:
                 dim_ok.append(False)
 
-            channel_ok.append(
-                sympy.expand(_denominator_of(pred_expr)
-                             - _denominator_of(ref_expr)) == 0
-                if _denominator_of(pred_expr) is not None
-                and _denominator_of(ref_expr) is not None else False)
+            channel_ok.append(same_channel(pred_expr, ref_expr))
 
             pred_mono = _monomial_set(pred_expr) or set()
             ref_mono = _monomial_set(ref_expr) or set()
@@ -208,18 +292,45 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
             else:
                 f1 = 1.0
             monomial_f1.append(f1)
-            coeff_ok.append(bool(equal) and pred_mono == ref_mono)
+
+            # The decomposition of 01 SS6.1 metric 6: "wrong structure" and
+            # "wrong number" are different failures and must be counted
+            # separately. Structure is the denominator channel plus the
+            # monomial support of the numerator; given both, the only thing
+            # left to get wrong is the coefficients, so the conditional rate
+            # is exactly the coefficient accuracy.
+            #
+            # The previous form was ``equal and pred_mono == ref_mono``, which
+            # is implied by ``equal`` and so reproduced symbolic exact match
+            # in all 46 archived runs - it measured nothing.
+            same_structure = bool(channel_ok[-1]) and pred_mono == ref_mono
+            structure_ok.append(same_structure)
+            if same_structure:
+                coeff_given_structure.append(bool(equal))
 
         if templates is not None:
             per_class[templates[i]].append(bool(symbolic_em[-1]))
 
     result = {
-        "raw_exact_match": summarise(raw_em),
+        # Token-sequence equality against the canonical target. This is the
+        # direct analogue of SYMBA's sequence accuracy, but on the canonical
+        # representation, NOT on MARTY's raw output string - the two are not
+        # numerically comparable and the old name ("raw_exact_match") claimed
+        # they were. Because to_prefix is a normal form, this is equal to
+        # symbolic EM on canonical targets by construction, and it was in all
+        # 46 archived runs; it separates only under data.target="raw".
+        "sequence_exact_match": summarise(raw_em),
         "symbolic_exact_match": summarise(symbolic_em),
         "parse_validity": summarise(well_formed),
         "mass_dimension_validity": summarise(dim_ok),
         "channel_accuracy": summarise(channel_ok),
-        "coefficient_exact": summarise(coeff_ok),
+        # Fraction whose denominator channel AND numerator monomial support
+        # are both right - the "did it find the functional form" half.
+        "structure_exact": summarise(structure_ok),
+        # Conditional on the structure being right: did it get the numbers
+        # right too. n is the number of structurally correct predictions, so
+        # symbolic EM = structure_exact x coefficient_exact.
+        "coefficient_exact": summarise(coeff_given_structure),
         "monomial_f1": {"value": (sum(monomial_f1) / len(monomial_f1)
                                   if monomial_f1 else 0.0),
                         "n": len(monomial_f1)},
@@ -227,6 +338,17 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
         # training, and should fall to zero as the model learns to close an
         # expression instead of nesting operators.
         "complexity_bailouts": bailout_count() - bailouts_before,
+        # Per-record outcomes, in split order. Arms at the same seed score the
+        # identical test records in the identical order, so keeping this makes
+        # a paired test (McNemar) and error-overlap analysis available on runs
+        # that already exist, instead of needing a rerun to ask a question
+        # nobody thought of at run time. It is a few dozen booleans.
+        "per_record": {
+            "symbolic": [bool(x) for x in symbolic_em],
+            "structure": [bool(x) for x in structure_ok],
+            "channel": [bool(x) for x in channel_ok],
+            "template": list(templates) if templates is not None else None,
+        },
     }
 
     if per_class:
@@ -245,9 +367,9 @@ def evaluate_predictions(predictions, references, templates=None) -> dict:
 def format_report(name: str, metrics: dict) -> str:
     """One-line-per-metric text block with n and CI, for the run log."""
     lines = [f"  {name}"]
-    for key in ("symbolic_exact_match", "raw_exact_match", "parse_validity",
+    for key in ("symbolic_exact_match", "sequence_exact_match", "parse_validity",
                 "mass_dimension_validity", "channel_accuracy",
-                "coefficient_exact"):
+                "structure_exact", "coefficient_exact"):
         if key not in metrics:
             continue
         m = metrics[key]

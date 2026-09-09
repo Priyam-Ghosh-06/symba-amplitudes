@@ -20,7 +20,7 @@ import torch
 
 from .checkpoint import save as save_checkpoint
 from .config import Config
-from .data.pipeline import build
+from .data.pipeline import build, seed_run
 from .eval.baselines import run_all as run_baselines
 from .eval.decode import ConstraintMask
 from .eval.metrics import clear_caches
@@ -119,6 +119,11 @@ def run_arm(arm: str, seed: int, job: Job, bundles: BundleCache,
     try:
         bundle = bundles.get(run_cfg, verbose=False)
 
+        # A run must be a function of its config and seed alone. The bundle is
+        # shared across arms, so without this the model's initial weights
+        # depend on how many arms ran before it.
+        seed_run(run_cfg, bundle)
+
         model = AmplitudeModel(run_cfg.model, bundle.graph_vocab,
                                bundle.amp_vocab, bundle.target_vocab,
                                bundle.lengths,
@@ -127,7 +132,7 @@ def run_arm(arm: str, seed: int, job: Job, bundles: BundleCache,
         trained = train_model(model, bundle, run_cfg, device,
                               run_name=run_name, log=log)
 
-        max_len = bundle.lengths[2] + 4
+        max_len = bundle.decode_budget
         test_metrics, predictions = evaluate_split(
             model, bundle.loaders["test"], bundle.target_vocab,
             run_cfg.train, device, max_len,

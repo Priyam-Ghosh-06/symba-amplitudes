@@ -16,7 +16,11 @@ from .config import Config
 from .data.vocab import Vocab
 from .model.model import AmplitudeModel
 
-FORMAT_VERSION = 1
+# 2: carries ``decode_budget`` separately from ``lengths``. Version 1
+# checkpoints predate the pipeline-correctness pass and are not loadable; they
+# were produced by code with a different decode budget, so silently accepting
+# them would reproduce neither their numbers nor the current ones.
+FORMAT_VERSION = 2
 
 
 def _vocab_state(vocab: Vocab) -> dict:
@@ -41,6 +45,7 @@ def save(path: str, model: AmplitudeModel, cfg: Config, bundle,
         "model_state": model.state_dict(),
         "config": cfg.to_dict(),
         "lengths": list(bundle.lengths),
+        "decode_budget": int(bundle.decode_budget),
         "segment_amp": bool(bundle.segment_amp),
         "segment_len": int(bundle.segment_len),
         "graph_vocab": _vocab_state(bundle.graph_vocab),
@@ -78,6 +83,7 @@ def load(path: str, device=None):
 
     meta = {
         "lengths": tuple(blob["lengths"]),
+        "decode_budget": blob["decode_budget"],
         "segment_amp": blob["segment_amp"],
         "segment_len": blob["segment_len"],
         "data_stats": blob.get("data_stats", {}),

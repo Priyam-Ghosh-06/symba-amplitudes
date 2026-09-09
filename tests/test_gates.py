@@ -26,13 +26,15 @@ from symba.data.dataset import AmplitudeDataset, collate
 from symba.data.graph import FeynmanGraph, parse_legs
 from symba.data.load import load_theory
 from symba.data.normalize import standardize, strip_keywords
-from symba.data.pipeline import build
+from symba.data.pipeline import _budget, build, seed_run
 from symba.data.serialize import (PrefixState, from_prefix, is_well_formed,
                                   target_tokens, to_prefix, token_type)
 from symba.data.splits import assert_disjoint, split_records
 from symba.data.vocab import Vocab
+from symba.experiment import ARMS
 from symba.eval.decode import ConstraintMask, beam_search
-from symba.eval.metrics import evaluate_predictions, wilson
+from symba.eval.metrics import (COMPLEXITY_CAP, evaluate_predictions,
+                                expansion_terms, wilson)
 from symba.model.model import AmplitudeModel
 
 DATA_ROOT = "data/Symba"
@@ -166,6 +168,25 @@ def test_G8_vocab_ids_are_deterministic_and_specials_fixed():
     assert again.itos == vocab.itos
 
 
+def test_G7_no_training_token_reaches_the_encoder_as_unk():
+    """The vocabulary must cover the stream the model actually reads.
+
+    ``amp_segments`` is what the math encoder is fed, and it carries a
+    ``<diagrams>`` placeholder that never appears in ``amp_tokens``. Building
+    the vocabulary over ``amp_tokens`` sent that token to the encoder as
+    ``<unk>`` in all 234 QCD records, and the OOV gate could not see it
+    because it measured the wrong stream.
+    """
+    for theory in ("QED", "QCD"):
+        _cfg, b = bundle(theory)
+        for record in b.train:
+            for segment in record["amp_segments"]:
+                unknown = [t for t in segment if t not in b.amp_vocab.stoi]
+                assert not unknown, f"{theory}: {unknown[:3]} encode as <unk>"
+            for token in record["graph_tokens"]:
+                assert token in b.graph_vocab.stoi, f"{theory}: {token!r}"
+
+
 def test_G8_vocab_never_sees_val_or_test():
     _cfg, b = bundle()
     train_tokens = {t for r in b.train for t in r["target_tokens"]}
@@ -206,6 +227,193 @@ def test_G9_tensors_derive_from_parsed_fields():
     assert not torch.equal(encode(records), before), \
         "model input did NOT change when the PARSED amp was perturbed"
     records[0]["amp_tokens"] = original
+
+
+def test_G9_decoding_cannot_see_the_target():
+    """The decisive no-leak gate.
+
+    G9 above proves the *tensors* come from the parsed streams. This proves the
+    stronger and more important thing: at prediction time the ground-truth
+    target is not an input. Corrupting, blanking, or deleting ``batch["target"]``
+    must leave the decoded sequences bit-identical, because free-running decode
+    starts from SOS and conditions only on the encoder memory and its own
+    output. If any of these change the prediction, every accuracy number in the
+    project is meaningless.
+    """
+    cfg, b = bundle()
+    torch.manual_seed(0)
+    model = AmplitudeModel(cfg.model, b.graph_vocab, b.amp_vocab,
+                           b.target_vocab, b.lengths,
+                           segment_amp=b.segment_amp,
+                           segment_len=b.segment_len).eval()
+    batch = next(iter(b.loaders["test"]))
+    constraint = ConstraintMask(b.target_vocab)
+    max_len = b.decode_budget
+
+    def decode(payload):
+        return beam_search(model, payload, b.target_vocab, beam_width=4,
+                           max_len=max_len, length_penalty=0.7,
+                           constrained=True, constraint=constraint)
+
+    baseline = decode(batch)
+    n_target = len(b.target_vocab)
+
+    blanked = dict(batch, target=torch.full_like(batch["target"], PAD))
+    randomised = dict(batch, target=torch.randint(4, n_target,
+                                                  batch["target"].shape))
+    dropped = {k: v for k, v in batch.items() if k != "target"}
+
+    for name, payload in (("blanked", blanked), ("randomised", randomised),
+                          ("absent", dropped)):
+        assert decode(payload) == baseline,             f"decoding changed when the target was {name} - the target leaks"
+
+    # The encoder must not read it either.
+    memory, _mask, _n = model.encode(batch)
+    other, _mask2, _n2 = model.encode(randomised)
+    assert torch.equal(memory, other), "encode() depends on the target"
+
+
+def test_G9_decoder_self_attention_is_causal():
+    """Teacher forcing must not let position t see position t+1.
+
+    Randomising the tail of the target has to leave the logits for the earlier
+    positions untouched, and has to change the later ones.
+    """
+    cfg, b = bundle()
+    torch.manual_seed(0)
+    model = AmplitudeModel(cfg.model, b.graph_vocab, b.amp_vocab,
+                           b.target_vocab, b.lengths,
+                           segment_amp=b.segment_amp,
+                           segment_len=b.segment_len).eval()
+    batch = next(iter(b.loaders["train"]))
+    cut = 5
+
+    with torch.no_grad():
+        before = model(batch)["logits"]
+        tail = batch["target"].clone()
+        tail[:, cut:] = torch.randint(4, len(b.target_vocab),
+                                      tail[:, cut:].shape)
+        after = model(dict(batch, target=tail))["logits"]
+
+    assert torch.allclose(before[:, :cut - 1], after[:, :cut - 1], atol=1e-5),         "logits before the cut moved - the decoder attends to the future"
+    assert not torch.allclose(before[:, cut:], after[:, cut:], atol=1e-5),         "logits after the cut did not move - the test is not exercising anything"
+
+
+def test_G10_decode_budget_comes_from_the_training_split_only():
+    """What the decoder may emit must not be set by held-out data.
+
+    The decode budget caps the output, so a maximum taken over all three splits
+    would let held-out target lengths reach the thing under test. Positional
+    table sizes are a separate quantity and are deliberately *not* asserted to
+    be train-only: an embedding row no gradient touches carries no information
+    about a held-out target, and sizing tables from train alone would make a
+    longer held-out sequence index off the end.
+    """
+    _cfg, b = bundle()
+    train_max = b.datasets["train"].lengths()
+    assert b.decode_budget == _budget(train_max[2]),         "decode budget is not derived from the training split alone"
+    for i, name in enumerate(("graph", "amp", "target")):
+        assert b.lengths[i] >= train_max[i], f"{name} table below train max"
+
+
+def test_G10_overlong_heldout_target_is_a_miss_not_a_crash():
+    """A held-out target the decoder cannot emit is a finding, not an error.
+
+    Raising would kill a whole leave-one-template-out fold whenever a held-out
+    class happens to be longer than anything in training. The model
+    structurally cannot emit such a target, so it scores as a miss on its own;
+    the build only has to count it.
+    """
+    _cfg, b = bundle()
+    assert "unreachable_targets" in b.stats
+    for split in ("val", "test"):
+        counted = b.stats["unreachable_targets"][split]
+        actual = sum(1 for item in b.datasets[split].items
+                     if item["target"].size(0) > b.decode_budget)
+        assert counted == actual, f"{split}: {counted} counted, {actual} present"
+
+
+def test_G14_equal_implies_structure():
+    """symbolic EM = structure x coefficient has to be an identity.
+
+    It only holds if ``equal`` implies ``structure``. It did not: the reference
+    is normalised expand -> together -> cancel while a prediction was only put
+    through ``together``, so an equal-but-uncancelled prediction kept a
+    denominator the reference lacks and scored equal-but-structure-false,
+    breaking the identity downward. Both sides are now cancelled, and the
+    channel test is projective.
+    """
+    # Algebraically identical to 4*s_12/s_13, written four awkward ways.
+    reference = ["/", "*", "INT+", "4", "s_12", "s_13"]
+    rewrites = [
+        ["/", "*", "*", "INT+", "2", "INT+", "2", "s_12", "s_13"],     # 2*2
+        ["/", "*", "INT+", "8", "s_12", "*", "INT+", "2", "s_13"],     # 8N/2D
+        ["/", "*", "INT+", "4", "s_12", "s_13"],                       # as-is
+    ]
+    scored = evaluate_predictions(rewrites, [reference] * len(rewrites))
+    equal = scored["per_record"]["symbolic"]
+    structure = scored["per_record"]["structure"]
+    broken = [i for i, (e, st) in enumerate(zip(equal, structure)) if e and not st]
+    assert not broken, f"equal but not structure at {broken} - identity broken"
+    assert all(equal), "these are all the same rational function"
+
+    # And the identity itself, on the aggregate.
+    em = scored["symbolic_exact_match"]["value"]
+    product = (scored["structure_exact"]["value"]
+               * scored["coefficient_exact"]["value"])
+    assert abs(em - product) < 1e-9, f"{em} != {product}"
+
+
+def test_G14_expansion_bound_catches_what_count_ops_misses():
+    """The complexity guard must bound expansion cost, not expression size.
+
+    ``count_ops`` of an unexpanded product of k binomials is constant in k
+    while the expansion grows as 2**k, and OPERATOR_SLACK admits roughly
+    k = 60. The guard has to look at the quantity that actually blows up.
+    """
+    a, b_, c, d = (sympy.Symbol(n) for n in ("s_12", "s_13", "s_14", "s_23"))
+    wide = ((a + b_) * (c + d) * (a + c) * (b_ + d)
+            * (a + d) * (b_ + c) * (a + b_ + c) * (b_ + c + d))
+
+    assert sympy.count_ops(wide) < COMPLEXITY_CAP,         "count_ops was expected to under-report this"
+    assert expansion_terms(wide) > sympy.count_ops(wide),         "the expansion bound must exceed the written size here"
+    assert expansion_terms(sympy.sympify("4*s_12/s_13")) <= 2,         "a legitimate canonical target must stay cheap"
+
+
+def test_G14_per_record_vector_matches_the_aggregate():
+    """The stored per-record vector must be the thing the headline sums."""
+    _cfg, b = bundle()
+    references = [r["target_tokens"] for r in b.test[:12]]
+    predictions = list(references)
+    predictions[0] = ["s_12"]                      # force one miss
+    scored = evaluate_predictions(predictions, references)
+
+    flags = scored["per_record"]["symbolic"]
+    assert len(flags) == len(references)
+    assert sum(flags) == scored["symbolic_exact_match"]["successes"]
+
+
+def test_G14_coefficient_metric_is_not_symbolic_em_again():
+    """The structure/coefficient split has to separate two real failure modes.
+
+    ``coefficient_exact`` used to be ``equal and same_monomials``, which is
+    implied by ``equal``, so it reproduced symbolic EM in all 46 archived runs.
+    A prediction with the right structure and a wrong number must now count as
+    a structure hit and a coefficient miss.
+    """
+    right = ["/", "*", "INT+", "4", "s_12", "s_13"]          # 4*s_12/s_13
+    wrong_number = ["/", "*", "INT+", "5", "s_12", "s_13"]   # 5*s_12/s_13
+    wrong_form = ["/", "*", "INT+", "4", "m_e", "s_13"]      # 4*m_e/s_13
+
+    scored = evaluate_predictions([wrong_number], [right])
+    assert scored["symbolic_exact_match"]["value"] == 0.0
+    assert scored["structure_exact"]["value"] == 1.0,         "right monomials and right channel should count as correct structure"
+    assert scored["coefficient_exact"]["value"] == 0.0
+
+    scored = evaluate_predictions([wrong_form], [right])
+    assert scored["structure_exact"]["value"] == 0.0
+    # Conditional metric: no structurally correct prediction, so n is 0.
+    assert scored["coefficient_exact"]["n"] == 0
 
 
 def test_G9_target_is_the_canonical_form():
@@ -305,6 +513,44 @@ def test_G11_padding_is_ignored_by_the_encoder():
 
 # --- G12: the three splits are disjoint --------------------------------------
 
+def test_G12_a_run_is_a_function_of_its_config_and_seed():
+    """The reproducibility gate. Without it every regenerated table is junk.
+
+    ``build`` seeds once, but a job trains several arms against a cached
+    bundle, so the global RNG has been advanced by every model, dropout draw
+    and shuffle that came before. The same (arm, seed) therefore produced
+    different initial weights depending on its position in the job - measured
+    at 0.53 max absolute difference in the decoder embedding, which is not a
+    rounding artefact.
+
+    ``seed_run`` resets immediately before construction. This builds the same
+    arm twice with an unrelated model in between and demands bit-identical
+    weights.
+    """
+    cfg, b = bundle()
+    run_cfg = cfg.with_overrides(**ARMS["full_vanilla_dense"])
+
+    def build_model(c):
+        seed_run(c, b)
+        return AmplitudeModel(c.model, b.graph_vocab, b.amp_vocab,
+                              b.target_vocab, b.lengths,
+                              segment_amp=b.segment_amp,
+                              segment_len=b.segment_len)
+
+    first = build_model(run_cfg)
+    build_model(cfg.with_overrides(**ARMS["capacity_64"]))   # perturb the RNG
+    second = build_model(run_cfg)
+
+    for key, value in first.state_dict().items():
+        assert torch.equal(value, second.state_dict()[key]),             f"{key} differs between two builds of the same (arm, seed)"
+
+    # The shuffle stream must reset too, or arm 2 sees a different epoch order.
+    seed_run(run_cfg, b)
+    first_order = list(iter(b.loaders["train"].batch_sampler))
+    seed_run(run_cfg, b)
+    assert list(iter(b.loaders["train"].batch_sampler)) == first_order
+
+
 def test_G12_splits_are_disjoint_and_stable():
     _cfg, b = bundle()
     assert assert_disjoint(b.train, b.val, b.test)
@@ -334,7 +580,7 @@ def test_G14_metrics_self_test():
 
     perfect = evaluate_predictions(list(references), references, templates)
     assert perfect["symbolic_exact_match"]["value"] == 1.0
-    assert perfect["raw_exact_match"]["value"] == 1.0
+    assert perfect["sequence_exact_match"]["value"] == 1.0
     assert perfect["parse_validity"]["value"] == 1.0
     assert perfect["mass_dimension_validity"]["value"] == 1.0
 
@@ -350,7 +596,7 @@ def test_G14_symbolic_beats_raw_on_reordered_equals():
     reference = to_prefix(to_sympy("m_e^2 + s_12"))
     reordered = ["+"] + to_prefix(to_sympy("s_12")) + to_prefix(to_sympy("m_e^2"))
     scored = evaluate_predictions([reordered], [reference])
-    assert scored["raw_exact_match"]["value"] == 0.0
+    assert scored["sequence_exact_match"]["value"] == 0.0
     assert scored["symbolic_exact_match"]["value"] == 1.0
 
 

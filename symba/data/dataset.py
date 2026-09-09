@@ -9,6 +9,8 @@ depends on:
   declared budget raises rather than being clipped (gate G10).
 """
 
+from collections import defaultdict
+
 import torch
 from torch.utils.data import Dataset, DataLoader
 
@@ -21,10 +23,11 @@ class AmplitudeDataset(Dataset):
     FIELDS = ("graph_tokens", "amp_tokens", "target_tokens")
 
     def __init__(self, records, graph_vocab, amp_vocab, target_vocab,
-                 max_lengths=None):
+                 max_lengths=None, max_segment_length=None):
         self.records = records
         self.vocabs = (graph_vocab, amp_vocab, target_vocab)
         self.max_lengths = max_lengths
+        self.max_segment_length = max_segment_length
 
         self.items = []
         for record in records:
@@ -46,6 +49,17 @@ class AmplitudeDataset(Dataset):
             # segment holding the whole amplitude, so the two paths share code.
             segments = [torch.tensor(amp_vocab.encode(seg), dtype=torch.long)
                         for seg in record["amp_segments"]]
+
+            # The math encoder's positional table is sized from the longest
+            # segment, so an over-budget diagram would index past it. Raise,
+            # never clip (01 P2).
+            if max_segment_length is not None:
+                longest = max(t.size(0) for t in segments)
+                if longest > max_segment_length:
+                    raise ValueError(
+                        f"{record.source_file}:{record.line_no} longest diagram "
+                        f"is {longest} tokens, over the budget of "
+                        f"{max_segment_length}")
 
             self.items.append({
                 "graph": torch.tensor(ids[0], dtype=torch.long),
@@ -125,11 +139,19 @@ def collate(batch):
 class LengthBucketSampler(torch.utils.data.Sampler):
     """Group similar-length items so dynamic padding actually saves work.
 
-    Batch composition is fixed by length order; the order the batches are
-    visited is reshuffled each epoch. That keeps run-to-run variation without
-    letting a batch pair a 20-token item with a 2000-token one and pad both to
-    the larger.
+    Each epoch the indices are shuffled, cut into pools of ``POOL_BATCHES``
+    batches, and sorted by cost inside each pool. Batches are therefore still
+    length-homogeneous - the point of bucketing - but *which* records share a
+    batch changes every epoch.
+
+    A globally sorted order would fix batch composition for the whole run:
+    the same records would be averaged together in every gradient step, which
+    removes the minibatch noise that a 277-example training set relies on.
+    Only the visiting order was being reshuffled before, which does not change
+    a single gradient.
     """
+
+    POOL_BATCHES = 8
 
     def __init__(self, dataset, batch_size, shuffle=True, generator=None):
         self.batch_size = batch_size
@@ -145,11 +167,43 @@ class LengthBucketSampler(torch.utils.data.Sampler):
             segments = item["amp_segments"]
             return (len(segments), max(t.size(0) for t in segments))
 
-        self.order = sorted(range(len(dataset)), key=cost)
+        self.cost = [cost(i) for i in range(len(dataset))]
+        self.order = sorted(range(len(dataset)), key=lambda i: self.cost[i])
+
+    def _epoch_order(self):
+        """Reshuffle inside each diagram-count group, then sort by length.
+
+        Diagram count is the expensive axis: segments are padded to an
+        (n_diagrams x longest_diagram) rectangle, so pairing a 3-diagram QCD
+        record with a 15-diagram one pads the whole batch to 15 and costs ~4x.
+        Shuffling globally would do exactly that at every pool boundary, so the
+        shuffle happens *within* a diagram-count group and the groups stay in
+        order. On a corpus with one segment per record (QED) there is a single
+        group and this is a plain shuffled-pool sort.
+        """
+        if not self.shuffle:
+            return self.order
+
+        groups = defaultdict(list)
+        for i in self.order:
+            groups[self.cost[i][0]].append(i)
+
+        pool = max(self.batch_size, self.batch_size * self.POOL_BATCHES)
+        out = []
+        for key in sorted(groups):
+            members = groups[key]
+            perm = torch.randperm(len(members),
+                                  generator=self.generator).tolist()
+            shuffled = [members[i] for i in perm]
+            for start in range(0, len(shuffled), pool):
+                out.extend(sorted(shuffled[start:start + pool],
+                                  key=lambda i: self.cost[i]))
+        return out
 
     def __iter__(self):
-        batches = [self.order[i:i + self.batch_size]
-                   for i in range(0, len(self.order), self.batch_size)]
+        order = self._epoch_order()
+        batches = [order[i:i + self.batch_size]
+                   for i in range(0, len(order), self.batch_size)]
         if self.shuffle:
             perm = torch.randperm(len(batches), generator=self.generator)
             batches = [batches[i] for i in perm.tolist()]

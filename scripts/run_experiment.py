@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from symba.config import Config
 from symba.experiment import ARMS
-from symba.data.pipeline import build
+from symba.data.pipeline import build, seed_run
 from symba.eval.baselines import run_all as run_baselines
 from symba.eval.decode import ConstraintMask
 from symba.eval.metrics import clear_caches, format_report
@@ -131,6 +131,11 @@ def main():
                 else:
                     run_bundle = bundle
 
+                # Reset before constructing the model: a bundle is reused
+                # across arms, so otherwise the initial weights depend on the
+                # arm's position in the job rather than on the seed.
+                seed_run(run_cfg, run_bundle)
+
                 model = AmplitudeModel(run_cfg.model, run_bundle.graph_vocab,
                                        run_bundle.amp_vocab,
                                        run_bundle.target_vocab,
@@ -140,7 +145,7 @@ def main():
                 trained = train_model(model, run_bundle, run_cfg, device,
                                       run_name=run_name)
 
-                max_len = run_bundle.lengths[2] + 4
+                max_len = run_bundle.decode_budget
                 constraint = ConstraintMask(run_bundle.target_vocab)
                 test_metrics, predictions = evaluate_split(
                     model, run_bundle.loaders["test"],

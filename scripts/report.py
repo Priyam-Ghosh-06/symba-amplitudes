@@ -15,11 +15,49 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 METRICS = [
     ("symbolic_exact_match", "symbolic EM"),
-    ("raw_exact_match", "raw EM"),
+    ("sequence_exact_match", "sequence EM"),
     ("parse_validity", "parse ok"),
     ("mass_dimension_validity", "dim-4 ok"),
     ("channel_accuracy", "channel"),
+    # The 01 SS6.1 metric-6 decomposition: symbolic EM = structure x coeff.
+    # coefficient_exact is conditional, so its n is the number of structurally
+    # correct predictions, not the split size.
+    ("structure_exact", "structure"),
+    ("coefficient_exact", "coeff|struct"),
 ]
+
+
+# Results written before the rename carry ``raw_exact_match``.
+_ALIASES = {"sequence_exact_match": ("raw_exact_match",)}
+
+
+def _get(metrics, key):
+    """Metric lookup that still finds pre-rename keys in archived results.
+
+    ``coefficient_exact`` changed meaning: it used to be
+    ``equal and same_monomials`` (which is just symbolic EM) and is now the
+    rate conditional on ``structure_exact``. A file without the partner metric
+    predates the change, so the old value is suppressed rather than printed
+    under the new label.
+    """
+    if key == "coefficient_exact" and "structure_exact" not in metrics:
+        return None
+    if key in metrics:
+        return metrics[key]
+    for old in _ALIASES.get(key, ()):
+        if old in metrics:
+            return metrics[old]
+    return None
+
+
+def _seq_em(metrics):
+    """Token-sequence EM, under either key.
+
+    Results written before the rename carry ``raw_exact_match``; the number is
+    the same, only the misleading name changed (it was never EM against
+    MARTY's raw string).
+    """
+    return _get(metrics, "sequence_exact_match")
 
 
 def _cell(metric, markdown=False):
@@ -56,7 +94,7 @@ def report_file(path, markdown=False):
     for seed, baselines in sorted(data.get("baselines", {}).items()):
         for name, metrics in baselines.items():
             row = f"{'[baseline] ' + name:<34}"
-            row += "".join(f"{_cell(metrics.get(k)):>14}" for k, _l in METRICS)
+            row += "".join(f"{_cell(_get(metrics, k)):>14}" for k, _l in METRICS)
             lines.append(row)
     if data.get("baselines"):
         lines.append("-" * len(header))
@@ -69,7 +107,7 @@ def report_file(path, markdown=False):
                 continue
             test = entry.get("test", {})
             row = f"{arm + ' s' + seed:<34}"
-            row += "".join(f"{_cell(test.get(k)):>14}" for k, _l in METRICS)
+            row += "".join(f"{_cell(_get(test, k)):>14}" for k, _l in METRICS)
             params = entry.get("n_parameters")
             minutes = entry.get("minutes")
             row += f"   {params / 1e6:.2f}M  {minutes:.0f}min" if params else ""
@@ -108,7 +146,7 @@ def markdown_file(path):
             f"template classes | train/val/test "
             f"{split.get('train')}/{split.get('val')}/{split.get('test')} | "
             f"target vocab {stats.get('vocab', {}).get('target')} | "
-            f"max target {stats.get('max_lengths', {}).get('target')} tokens")
+            f"target budget {stats.get('length_budgets', stats.get('max_lengths', {})).get('target')} tokens")
         lines.append("")
 
     header = ("| run | symbolic EM | raw EM | parse ok | dim-4 ok | channel | "
@@ -119,7 +157,7 @@ def markdown_file(path):
         for name, metrics in baselines.items():
             lines.append(
                 f"| _{name}_ | {_md_cell(metrics.get('symbolic_exact_match'))} "
-                f"| {_md_cell(metrics.get('raw_exact_match'))} "
+                f"| {_md_cell(_seq_em(metrics))} "
                 f"| {_md_cell(metrics.get('parse_validity'))} "
                 f"| {_md_cell(metrics.get('mass_dimension_validity'))} "
                 f"| {_md_cell(metrics.get('channel_accuracy'))} | - | - |")
@@ -135,7 +173,7 @@ def markdown_file(path):
             lines.append(
                 f"| `{arm}` s{seed} "
                 f"| **{_md_cell(test.get('symbolic_exact_match'))}** "
-                f"| {_md_cell(test.get('raw_exact_match'))} "
+                f"| {_md_cell(_seq_em(test))} "
                 f"| {_md_cell(test.get('parse_validity'))} "
                 f"| {_md_cell(test.get('mass_dimension_validity'))} "
                 f"| {_md_cell(test.get('channel_accuracy'))} "
