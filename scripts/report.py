@@ -146,7 +146,7 @@ def markdown_file(path):
             f"template classes | train/val/test "
             f"{split.get('train')}/{split.get('val')}/{split.get('test')} | "
             f"target vocab {stats.get('vocab', {}).get('target')} | "
-            f"target budget {stats.get('length_budgets', stats.get('max_lengths', {})).get('target')} tokens")
+            f"decode budget {stats.get('decode_budget', '?')} tokens")
         lines.append("")
 
     header = ("| run | symbolic EM | raw EM | parse ok | dim-4 ok | channel | "

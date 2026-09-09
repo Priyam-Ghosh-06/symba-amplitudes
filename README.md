@@ -155,54 +155,70 @@ metrics are what they claim to be.
 
 The pipeline is verified — `python tests/test_gates.py` → 47/47.
 
-**Model results are being regenerated and `RESULTS.md` should not be quoted
-until they are.** A correctness pass found several harness defects that move
-the numbers, including one that made runs depend on their position in a job
-rather than on their seed. The fixes are in; the reruns are not. The full
-account is in [`docs/04_change_review.md`](docs/04_change_review.md), including
-two earlier conclusions that were withdrawn under review.
+**No model results are checked in.** A correctness pass found harness defects
+that move the numbers — among them one that made a run depend on its position
+in a job rather than on its seed — so every figure and result file produced
+before it was deleted rather than left lying around to be quoted by accident.
+Regenerating them is one command; see *Running it*.
 
 Everything cited above is a measurement of the *corpus*, not of a model, and is
 unaffected.
 
 ## Repository
 
+Grouped by what each part is for, in the order data flows through it.
+
 ```
-symba/
-  config.py          every knob; a run is this dataclass tree plus a seed
-  experiment.py      ARMS: named single-factor overrides, so a difference is attributable
-  data/
-    load.py          S1  parse and validate — 4 fields, 4 legs, no fallback records
-    normalize.py     S2  dummy-index normalisation, keyword stripping
-    canonical.py     S3  the target definition, and the mass-dimension invariant
-    ast_parse.py     S4a Lark LALR grammar → prefix AST; per-diagram segmentation
-    graph.py         S4b vertices → Feynman edge list, propagators resolved
-    serialize.py     S5  typed prefix serialisation and its exact inverse
-    vocab.py         S6  vocabulary, built from the training split only
-    splits.py        template classes; protocol A and protocol B
-    dataset.py       tensors, dynamic padding, length-bucketed sampling
-    pipeline.py      build() — the one route from raw line to tensor
-  model/
-    embed.py         token + type + positional; role-filler and TPR arms
-    attention.py     vanilla | xsa_proj | xsa_mask
-    ffn.py           dense | MoE with load balancing and utilisation logging
-    model.py         dual-pathway encoders, cross-attention decoder
-  train/loop.py      training; selection on free-running symbolic EM
-  eval/
-    decode.py        beam search, length normalisation, grammar constraints
-    metrics.py       the metric suite and its decomposition
-    baselines.py     most-frequent, exact lookup, 1-NN, template oracle
-tests/test_gates.py  the 47 gates
-scripts/             run_experiment (one job), run_queue (a batch), report, predict, plots
-docs/                00 orientation · 01 design · 02 defects · 03 proposals · 04 change review
+data/Symba/                QED and QCD tree-level corpora, one record per line
+    QED/  QCD/             interaction : vertices : amp : sq_amp
+
+symba/data/                preprocessing — raw line to tensor, one route only
+    load.py                parse and validate; 4 fields, 4 legs, no fallback records
+    normalize.py           dummy-index normalisation, keyword stripping
+    canonical.py           what the answer IS: canonical form + mass-dimension invariant
+    ast_parse.py           amplitude to prefix AST; per-diagram segmentation
+    graph.py               vertices to Feynman edge list, propagators resolved
+    serialize.py           typed prefix stream, and its exact inverse
+    vocab.py               vocabulary, from the training split only
+    splits.py              template classes; protocol A and protocol B
+    dataset.py             tensors, dynamic padding, length-bucketed sampling
+    pipeline.py            build() — the single assembly point
+
+symba/model/               the network, one component per file
+    embed.py               token + type + positional; role-filler and TPR variants
+    attention.py           vanilla | xsa_proj | xsa_mask
+    ffn.py                 dense | mixture-of-experts, load-balanced and instrumented
+    model.py               graph and math encoders, cross-attention decoder, fusion
+
+symba/train/loop.py        training; checkpoint selection on free-running symbolic EM
+symba/eval/
+    decode.py              beam search, length normalisation, grammar constraints
+    metrics.py             the metric suite and its structure/coefficient decomposition
+    baselines.py           most-frequent, exact lookup, 1-NN, template oracle
+
+symba/config.py            every knob; a run is this dataclass tree plus a seed
+symba/experiment.py        ARMS — the ablation table (see below)
+symba/checkpoint.py        self-contained checkpoints: weights, vocabularies, budgets
+symba/inference.py         prediction on unseen amplitudes, same preprocessing as training
+
+tests/test_gates.py        47 gates; nothing downstream is trusted until they pass
+
+scripts/
+    run_queue.py           a batch of jobs, sequential and resumable
+    run_experiment.py      a single job
+    report.py              tables with n and Wilson intervals
+    plots.py               figures
+    predict.py             run a checkpoint against a file or a single amplitude
+
+results/                   written by a run: one JSON per job, plus figures/
+
+notebooks/                 the original exploratory notebooks, superseded by the
+                           modules above and kept only as provenance
 ```
 
 Two files carry the conceptual weight: `data/canonical.py` decides what the
 answer *is*, and `data/splits.py` decides what the question *is*. The rest is
 machinery.
-
-Start with [`docs/00_orientation.md`](docs/00_orientation.md) — it maps every
-number to the file that produced it.
 
 ## Running it
 
