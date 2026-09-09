@@ -88,6 +88,7 @@ def evaluate_split(model, loader, vocab, tcfg, device, max_len,
     """Free-running decode over a split, scored with the full metric suite."""
     model.eval()
     predictions, references, templates = [], [], []
+    indices = []
 
     for batch in loader:
         batch_on_device = {k: (v.to(device) if torch.is_tensor(v) else v)
@@ -102,8 +103,12 @@ def evaluate_split(model, loader, vocab, tcfg, device, max_len,
             predictions.append(vocab.decode(ids[1:]))
             references.append(vocab.decode(batch["target"][i].tolist()[1:]))
         templates.extend(batch["template"])
+        indices.extend(batch["index"].tolist())
 
     scored = evaluate_predictions(predictions, references, templates)
+    # The dataset index each row refers to, so two arms' per-record vectors can
+    # be aligned even though the loader batches by length rather than by id.
+    scored["per_record"]["index"] = indices
     clear_caches()          # sympy's global cache grows without bound otherwise
     return scored, predictions
 
@@ -112,7 +117,7 @@ def train_model(model, bundle, cfg, device, run_name="run", log=print):
     tcfg = cfg.train
     loaders = bundle.loaders
     vocab = bundle.target_vocab
-    max_len = bundle.lengths[2] + 4
+    max_len = bundle.decode_budget
     constraint = ConstraintMask(vocab)
 
     model = model.to(device)
@@ -150,7 +155,7 @@ def train_model(model, bundle, cfg, device, run_name="run", log=print):
                 constraint, beam_width=tcfg.select_beam_width)
             score = val_metrics["symbolic_exact_match"]["value"]
             entry["val_symbolic_em"] = score
-            entry["val_raw_em"] = val_metrics["raw_exact_match"]["value"]
+            entry["val_sequence_em"] = val_metrics["sequence_exact_match"]["value"]
             entry["val_parse_validity"] = val_metrics["parse_validity"]["value"]
 
             if score > best_score:

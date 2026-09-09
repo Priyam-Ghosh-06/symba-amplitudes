@@ -68,7 +68,7 @@ class Predictor:
                            else self.cfg.train.beam_width)
         self.constrained = (constrained if constrained is not None
                             else self.cfg.train.constrained_decoding)
-        self.max_len = self.meta["lengths"][2] + 4
+        self.max_len = self.meta["decode_budget"]
         self.segment_amp = self.meta["segment_amp"]
 
     def _batch(self, prepared: list) -> dict:
