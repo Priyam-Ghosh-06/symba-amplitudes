@@ -246,7 +246,7 @@ that factor.
 | arm | what it changes |
 |---|---|
 | `full_vanilla_dense` | the control: both pathways, standard attention, dense FFN |
-| `graph_only` / `math_only` | modality ablation — the pathway is *not built*, not zeroed |
+| `graph_only` / `math_only` | modality ablation |
 | `full_xsa_proj_dense` | exclusive self-attention as usually implemented: project the output off its own value vector |
 | `full_xsa_mask_dense` | exclusive self-attention as usually *argued*: mask the attention diagonal before the softmax |
 | `full_vanilla_moe` | mixture-of-experts FFN, load-balanced and instrumented |
