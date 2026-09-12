@@ -2,7 +2,7 @@
 
     python scripts/run_queue.py --batch core
     python scripts/run_queue.py --list
-    python scripts/run_queue.py --batch qcd_long --dry-run
+    python scripts/run_queue.py --batch template --dry-run
 
 Why a queue rather than parallel jobs: this box has 15.7 GB and a QCD run's
 resident set reaches ~3.8 GB, so running three at once put it into swap and
@@ -35,20 +35,20 @@ ALL_ARMS = ("full_vanilla_dense", "math_only", "graph_only",
 # 30 (8.3% -> 36.1% -> 63.9% -> 75.0%), so a shorter run measures the compute
 # budget rather than the architecture.
 BATCHES = {
-    # The two headline numbers, and the QCD rerun that the 30-epoch results need.
+    # The headline: protocol A on both theories, three seeds, with the modality
+    # ablation beside the control. Three seeds is the minimum for any arm
+    # comparison, and one file per theory means nothing is counted twice.
     "core": [
-        Job("QCD_record_long", theory="QCD",
+        Job("QED_record_seeds", theory="QED", seeds=(0, 1, 2),
             arms=("full_vanilla_dense", "math_only", "graph_only")),
+        Job("QCD_record_seeds", theory="QCD", seeds=(0, 1, 2),
+            arms=("full_vanilla_dense", "math_only", "graph_only")),
+    ],
+    # Architecture arms against the control, seed 0.
+    "arms": [
         Job("QED_record_arms", theory="QED", baselines=False,
             arms=("full_xsa_proj_dense", "full_xsa_mask_dense",
                   "full_vanilla_moe", "unconstrained_decode")),
-    ],
-    # Confidence intervals. Three seeds is the minimum for an arm comparison.
-    "seeds": [
-        Job("QED_record_seeds", theory="QED", seeds=(1, 2),
-            arms=("full_vanilla_dense", "math_only", "graph_only")),
-        Job("QCD_record_seeds", theory="QCD", seeds=(1, 2),
-            arms=("full_vanilla_dense", "math_only", "graph_only")),
     ],
     # Protocol B at a usable held-out size: the fraction applies to template
     # classes, not records, so 10% would hold out two classes and tell us nothing.
