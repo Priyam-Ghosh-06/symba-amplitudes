@@ -123,26 +123,31 @@ is a property the physics already had.
 
 **Make invalid output unrepresentable.** Decoding is grammar-constrained: at
 each step, any token that cannot legally continue the prefix is masked before
-the softmax. A syntactically malformed answer stops being something to measure
-and starts being something that cannot happen.
+the softmax. On templates the model has seen it holds completely: every
+protocol-A output on every seed parses. It is not yet a guarantee. On held-out
+templates a lightly trained checkpoint still produced malformed output about a
+third of the time, and closing that gap is open work.
 
 **Turn physics into a metric.** Mass-dimension-4 homogeneity is checked on every
-prediction. This is where it earns its keep — under a held-out-template split,
-QED output was **98.8% well-formed and 0% dimensionally consistent.** Asked for
-a formula it had never seen, the model wrote fluent, grammatical,
-physically impossible nonsense. It had the accent down and not a word of the
-language. No aggregate accuracy number would have told you that.
+prediction. This is where it earns its keep. With nine whole templates held
+out, the QED model got **none of 102** right, and among the outputs that could
+be checked at all, **not one had mass dimension 4.** Asked for a formula it had
+never seen, it wrote grammatical, physically impossible nonsense. It had the
+accent down and not a word of the language. No aggregate accuracy number would
+have told you that.
 
 **Report two splits, always together.** Protocol A splits by record — the
 interpolation number, comparable to prior work. Protocol B holds out whole
-functional forms — the generalisation number. They differ enormously, and that
-gap *is* the result rather than an embarrassment to be buried.
+functional forms — the generalisation number. They differ enormously — 83.6%
+against 0% on QED — and that gap *is* the result rather than an embarrassment
+to be buried.
 
 **Decompose the error.** Symbolic exact match now factorises as
 `structure × coefficient`: did it find the right functional form, and given
-that, did it get the numbers right? On every seed measured so far the variance
-lives almost entirely in the first factor. Finding the form is the hard part;
-the arithmetic, once the form is right, mostly takes care of itself.
+that, did it get the numbers right? Across six seeded runs, 20 of the 24
+errors are the wrong functional form, and whenever the form was right the
+coefficients were right in 158 of 162 cases. Finding the form is the hard
+part; the arithmetic mostly takes care of itself.
 
 **Gate everything.** 47 tests stand between the raw corpus and any number this
 repository produces. Two of them exist because "the decoder cannot see the
@@ -155,14 +160,36 @@ metrics are what they claim to be.
 
 The pipeline is verified — `python tests/test_gates.py` → 47/47.
 
-**No model results are checked in.** A correctness pass found harness defects
-that move the numbers — among them one that made a run depend on its position
-in a job rather than on its seed — so every figure and result file produced
-before it was deleted rather than left lying around to be quoted by accident.
-Regenerating them is one command; see *Running it*.
+Every number below comes from the regenerated pipeline. Earlier figures were
+produced before a fix that made a run depend on its position in a job rather
+than on its seed, and were deleted rather than left around to be quoted.
 
-Everything cited above is a measurement of the *corpus*, not of a model, and is
-unaffected.
+Record split (protocol A), the control model, three seeds per theory:
+
+| | QED | QCD |
+|---|---|---|
+| symbolic exact match, mean of 3 seeds | 83.6% (sd 2.7) | 89.5% (sd 7.8) |
+| pooled over seeds | 91 / 109 | 67 / 73 |
+| template oracle — the retrieval ceiling | 64.5–70.2% | 50.0–78.6% |
+| nearest-neighbour retrieval | 16.8% | 19.5% |
+| errors that pick the wrong propagator channel | 8 of 18 | 0 of 6 |
+| errors with the right form but a wrong coefficient | 4 of 18 | 0 of 6 |
+
+The model beats the oracle on every seed of both theories. The two theories
+fail differently: QED's commonest error is the denominator, which is a question
+about topology, while every QCD error is in which terms the numerator contains.
+QCD test splits hold 14–31 records, so its per-seed spread is wide and the
+pooled figure is the one to lean on.
+
+Holding out whole templates instead (protocol B: QED, seed 0, 102 test records
+from nine templates it never saw), the model and every baseline score 0%. That
+number comes from the checkpoint validation selected, which is epoch 10: on
+held-out templates validation accuracy never rises above zero, so the first
+evaluation wins the tie. It describes a lightly trained model, not a converged
+one.
+
+Raw outputs are in `results/`, including per-record correctness vectors, so two
+arms at the same seed can be compared record by record.
 
 ## Repository
 
