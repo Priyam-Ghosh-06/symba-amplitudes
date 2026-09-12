@@ -2,7 +2,7 @@
 
     python scripts/plots.py
 
-Writes PNGs to figures/. Every panel carries n and a 95% Wilson interval,
+Writes PNGs to results/figures/. Every panel carries n and a 95% Wilson interval,
 because with test splits of 14-102 records a bare bar chart would imply a
 precision the data does not have.
 """
@@ -20,7 +20,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-OUT = "figures"
+OUT = "results/figures"
 BLUE, RED, GREY, GREEN = "#2E86AB", "#E84855", "#9AA0A6", "#3BB273"
 
 plt.rcParams.update({
@@ -72,8 +72,8 @@ def baseline(data, files, name):
 
 def fig_headline(data):
     theories = [
-        ("QED", ["QED_record_long_seed0", "QED_record_seeds"]),
-        ("QCD", ["QCD_record_long", "QCD_record_seeds"]),
+        ("QED", ["QED_record_seeds"]),
+        ("QCD", ["QCD_record_seeds"]),
     ]
     fig, axes = plt.subplots(1, 2, figsize=(9, 4))
 
@@ -117,9 +117,9 @@ def fig_headline(data):
 def fig_protocols(data):
     fig, ax = plt.subplots(figsize=(7.2, 4))
     groups = [
-        ("QED", ["QED_record_long_seed0", "QED_record_seeds"],
+        ("QED", ["QED_record_seeds"],
          ["QED_templateB_long"]),
-        ("QCD", ["QCD_record_long", "QCD_record_seeds"],
+        ("QCD", ["QCD_record_seeds"],
          ["QCD_templateB_long"]),
     ]
     x = np.arange(len(groups))
@@ -155,8 +155,8 @@ def fig_protocols(data):
 def fig_modality(data):
     fig, axes = plt.subplots(1, 2, figsize=(9, 4))
     setups = [
-        ("QED", ["QED_record_long_seed0", "QED_record_seeds"]),
-        ("QCD", ["QCD_record_long", "QCD_record_seeds"]),
+        ("QED", ["QED_record_seeds"]),
+        ("QCD", ["QCD_record_seeds"]),
     ]
     arms = [("graph_only", "graph only"), ("math_only", "AST only"),
             ("full_vanilla_dense", "graph + AST")]
@@ -195,7 +195,7 @@ def fig_modality(data):
 
 def fig_curves(data):
     fig, axes = plt.subplots(1, 2, figsize=(9.5, 4))
-    sources = [("QED", "QED_record_long_seed0"), ("QCD", "QCD_record_long")]
+    sources = [("QED", "QED_record_seeds"), ("QCD", "QCD_record_seeds")]
 
     for ax, (theory, name) in zip(axes, sources):
         entry = data.get(name, {}).get("arms", {}).get(
@@ -242,8 +242,8 @@ def fig_decomposition(data):
                ("channel_accuracy", "right channel"),
                ("monomial_f1", "monomial F1"),
                ("symbolic_exact_match", "fully correct")]
-    setups = [("QED protocol A", "QED_record_long_seed0", "full_vanilla_dense", "0"),
-              ("QCD protocol A", "QCD_record_long", "full_vanilla_dense", "0"),
+    setups = [("QED protocol A", "QED_record_seeds", "full_vanilla_dense", "0"),
+              ("QCD protocol A", "QCD_record_seeds", "full_vanilla_dense", "0"),
               ("QED protocol B", "QED_templateB_long", "full_vanilla_dense", "0"),
               ("QCD protocol B", "QCD_templateB_long", "full_vanilla_dense", "0")]
 
@@ -275,7 +275,7 @@ def fig_decomposition(data):
 # --- Figure 6: seed spread vs arm spread ------------------------------------
 
 def fig_seed_noise(data):
-    files = ["QED_record_long_seed0", "QED_record_seeds", "QED_record_arms"]
+    files = ["QED_record_seeds", "QED_record_arms"]
     arms = ["full_vanilla_dense", "full_xsa_proj_dense", "full_xsa_mask_dense",
             "full_vanilla_moe"]
 

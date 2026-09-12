@@ -62,53 +62,78 @@ def bailout_count() -> int:
 TERM_CAP = 2000
 
 
-def expansion_terms(expr, cap: int = TERM_CAP) -> int:
-    """Upper bound on the number of monomials in ``expand(expr)``.
-
-    ``count_ops`` bounds the size of the *written* expression, which does not
-    bound the cost of expanding it: a product of k binomials has ``count_ops``
-    11 for every k while its expansion grows as 2**k, and OPERATOR_SLACK
-    permits roughly k = 60. So the old cap never bound the quantity that
-    actually blows up.
-
-    One pass over the tree, short-circuited as soon as the bound passes ``cap``,
-    so the pathological case is the cheap case. A negative integer power is a
-    single factor - ``expand`` does not distribute over 1/(a + b) - so it
-    counts as one term rather than recursing into the base.
-    """
-    if expr.is_Atom:
+def _power_bound(base_terms: int, power: int, cap: int) -> int:
+    """``base_terms ** power``, short-circuited once it passes ``cap``."""
+    if base_terms <= 1:
         return 1
-    if expr.is_Add:
-        total = 0
-        for arg in expr.args:
-            total += expansion_terms(arg, cap)
-            if total > cap:
-                return total
-        return total
-    if expr.is_Mul:
-        total = 1
-        for arg in expr.args:
-            total *= expansion_terms(arg, cap)
-            if total > cap:
-                return total
-        return total
+    total = 1
+    for _ in range(power):
+        total *= base_terms
+        if total > cap:
+            return total
+    return total
+
+
+def _fraction_bound(expr, cap: int):
+    """Upper bounds on the monomial counts of (numerator, denominator) once
+    ``_as_fraction`` has put ``expr`` over one denominator and expanded it."""
+    if expr.is_Atom:
+        return 1, 1
     if expr.is_Pow:
         base, exponent = expr.as_base_exp()
         if not exponent.is_Integer:
-            return cap + 1
+            return cap + 1, cap + 1
         power = int(exponent)
+        num, den = _fraction_bound(base, cap)
         if power < 0:
-            return 1
-        base_terms = expansion_terms(base, cap)
-        if base_terms <= 1:
-            return 1
-        total = 1
-        for _ in range(power):
-            total *= base_terms
-            if total > cap:
-                return total
-        return total
-    return 1
+            num, den, power = den, num, -power
+        return _power_bound(num, power, cap), _power_bound(den, power, cap)
+    if expr.is_Mul:
+        num = den = 1
+        for arg in expr.args:
+            a_num, a_den = _fraction_bound(arg, cap)
+            num, den = num * a_num, den * a_den
+            if num > cap or den > cap:
+                return num, den
+        return num, den
+    if expr.is_Add:
+        parts = [_fraction_bound(arg, cap) for arg in expr.args]
+        den = 1
+        for _n, a_den in parts:
+            den *= a_den
+            if den > cap:
+                return cap + 1, den
+        # Over a common denominator each term's numerator is multiplied by
+        # every other term's denominator.
+        num = 0
+        for a_num, a_den in parts:
+            num += a_num * (den // a_den)
+            if num > cap:
+                return num, den
+        return num, den
+    return 1, 1
+
+
+def expansion_terms(expr, cap: int = TERM_CAP) -> int:
+    """Upper bound on the monomial count ``_as_fraction`` will produce.
+
+    It has to bound what is actually computed, and two versions of this guard
+    bounded something else. ``count_ops`` measures the written expression,
+    which says nothing about expansion: a product of k binomials has
+    ``count_ops`` 11 for every k while it expands to 2**k terms. The next
+    version bounded ``expand`` alone and counted 1/(a + b) as one term - true
+    for ``expand``, but ``_as_fraction`` runs ``together`` first, which puts a
+    sum of fractions over a common denominator and multiplies every other
+    denominator into each numerator. Measured: a sum of k such fractions took
+    0.9 s to score at k = 8 and 7.5 s at k = 10, roughly tripling per fraction,
+    with the operator budget admitting k of about 35 and the guard never
+    firing.
+
+    This tracks numerator and denominator separately through the tree - a sum
+    combines as N = sum_i N_i * prod_{j != i} D_j - in one pass, short-circuited
+    at ``cap``, so the pathological case stays the cheap case.
+    """
+    return max(_fraction_bound(expr, cap))
 
 
 def _too_complex(expr) -> bool:
@@ -152,12 +177,23 @@ def clear_caches():
 
 
 def _as_fraction(expr):
-    """``(expanded numerator, denominator)`` for a rational expression."""
-    if expr is None or _too_complex(expr):
+    """``(expanded numerator, denominator)`` for a rational expression.
+
+    Every metric asks for the same prediction's fraction - equality, the
+    dimension check, the channel, the monomial set - so the cache is consulted
+    before anything runs, and a complexity rejection is cached like any other
+    result. Checking first and caching afterwards counted one rejected
+    prediction four times in ``complexity_bailouts``.
+    """
+    if expr is None:
         return (None, None)
     key = sympy.srepr(expr)
     if key in _FRACTION_CACHE:
         return _FRACTION_CACHE[key]
+    if _too_complex(expr):
+        if len(_FRACTION_CACHE) < 20_000:
+            _FRACTION_CACHE[key] = (None, None)
+        return (None, None)
     try:
         # ``cancel`` matters, and its absence was a real defect. The reference
         # is built by canonical.py as expand -> together -> cancel; a
