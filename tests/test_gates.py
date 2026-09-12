@@ -33,8 +33,9 @@ from symba.data.splits import assert_disjoint, split_records
 from symba.data.vocab import Vocab
 from symba.experiment import ARMS
 from symba.eval.decode import ConstraintMask, beam_search
-from symba.eval.metrics import (COMPLEXITY_CAP, evaluate_predictions,
-                                expansion_terms, wilson)
+from symba.eval.metrics import (COMPLEXITY_CAP, TERM_CAP,
+                                evaluate_predictions, expansion_terms,
+                                wilson)
 from symba.model.model import AmplitudeModel
 
 DATA_ROOT = "data/Symba"
@@ -391,6 +392,35 @@ def test_G14_per_record_vector_matches_the_aggregate():
     flags = scored["per_record"]["symbolic"]
     assert len(flags) == len(references)
     assert sum(flags) == scored["symbolic_exact_match"]["successes"]
+
+
+def test_G14_expansion_bound_accounts_for_together():
+    """The guard must bound what _as_fraction computes, not expand() alone.
+
+    _as_fraction runs together() before expand(), and together() multiplies
+    every other denominator into each term of a sum of fractions. Counting
+    1/(a + b) as one term let a sum of k such fractions through at any k:
+    measured, 0.9 s to score at k = 8 and 7.5 s at k = 10, tripling per
+    fraction. With the bound fixed, k = 12 has to be rejected and cheap; if it
+    regresses this test takes over a minute and then fails.
+    """
+    import time
+    _cfg, b = bundle()
+    reference = max((r["target_tokens"] for r in b.test),
+                    key=lambda t: sum(tok in ("+", "*", "/", "^", "NEG")
+                                      for tok in t))
+    syms = ["s_12", "s_13", "s_14", "s_23", "s_24", "s_34", "m_e", "m_mu"]
+    pairs = [(x, y) for i, x in enumerate(syms) for y in syms[i + 1:]]
+    k = 12
+    prediction = ["+"] * (k - 1)
+    for x, y in pairs[:k]:
+        prediction += ["/", "s_12", "+", x, y]
+
+    assert expansion_terms(from_prefix(prediction)) > TERM_CAP
+    start = time.time()
+    scored = evaluate_predictions([prediction], [reference])
+    assert time.time() - start < 5, "sum of fractions was expanded, not rejected"
+    assert scored["complexity_bailouts"] == 1
 
 
 def test_G14_coefficient_metric_is_not_symbolic_em_again():
