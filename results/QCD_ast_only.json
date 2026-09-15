@@ -1,0 +1,867 @@
+{
+ "theory": "QCD",
+ "variant": "ast_only",
+ "config": {
+  "data": {
+   "root": "data/Symba",
+   "theory": "QCD",
+   "val_frac": 0.1,
+   "test_frac": 0.1,
+   "segment_amp": true
+  },
+  "model": {
+   "d_model": 128,
+   "num_heads": 4,
+   "graph_layers": 2,
+   "math_layers": 2,
+   "dec_layers": 2,
+   "dim_feedforward": 512,
+   "dropout": 0.1,
+   "embedding": "role_filler",
+   "attention": "xsa",
+   "ffn": "moe",
+   "n_experts": 4,
+   "top_k": 2,
+   "moe_aux_weight": 0.01,
+   "use_graph": false,
+   "use_math": true
+  },
+  "train": {
+   "batch_size": 4,
+   "epochs": 60,
+   "lr": 0.0003,
+   "weight_decay": 0.01,
+   "warmup_frac": 0.1,
+   "grad_clip": 1.0,
+   "eval_every": 5,
+   "patience": 30,
+   "beam_width": 4,
+   "length_penalty": 0.7,
+   "seed": 42
+  }
+ },
+ "parameters": 2687488,
+ "data": {
+  "records": 234,
+  "train": 188,
+  "val": 23,
+  "test": 23,
+  "vocab": {
+   "graph": 24,
+   "amplitude": 177,
+   "target": 34
+  },
+  "longest": {
+   "sq_amp_characters": 2872,
+   "amp_tokens": 2859,
+   "diagram_tokens": 239,
+   "target_tokens": 134
+  },
+  "segment_amp": true
+ },
+ "minutes": 202.0,
+ "history": [
+  {
+   "epoch": 1,
+   "train_loss": 3.27307725876587,
+   "val_loss": 2.243987435427977,
+   "val_token_accuracy": 0.41624598439651217,
+   "lr": 5.106382978723404e-05,
+   "seconds": 73.7
+  },
+  {
+   "epoch": 2,
+   "train_loss": 1.6237655274279705,
+   "val_loss": 0.8782099578401373,
+   "val_token_accuracy": 0.7347407067462138,
+   "lr": 0.00010106382978723403,
+   "seconds": 75.0
+  },
+  {
+   "epoch": 3,
+   "train_loss": 0.8384825223640122,
+   "val_loss": 0.4839994626178715,
+   "val_token_accuracy": 0.8508490133088573,
+   "lr": 0.00015106382978723401,
+   "seconds": 74.4
+  },
+  {
+   "epoch": 4,
+   "train_loss": 0.5587657632555857,
+   "val_loss": 0.34242450838080235,
+   "val_token_accuracy": 0.8926112895823772,
+   "lr": 0.00020106382978723404,
+   "seconds": 77.0
+  },
+  {
+   "epoch": 5,
+   "train_loss": 0.4071267946369171,
+   "val_loss": 0.255307961133928,
+   "val_token_accuracy": 0.9050022946305645,
+   "lr": 0.00025106382978723403,
+   "val_sequence_accuracy": 0.0,
+   "seconds": 87.7
+  },
+  {
+   "epoch": 6,
+   "train_loss": 0.31136935572859503,
+   "val_loss": 0.17600659322388515,
+   "val_token_accuracy": 0.9403396053235429,
+   "lr": 0.0003,
+   "seconds": 80.6
+  },
+  {
+   "epoch": 7,
+   "train_loss": 0.2493778227948072,
+   "val_loss": 0.13810850468563782,
+   "val_token_accuracy": 0.9472234970169803,
+   "lr": 0.00029974622374069024,
+   "seconds": 97.5
+  },
+  {
+   "epoch": 8,
+   "train_loss": 0.1846107235982896,
+   "val_loss": 0.08317267246452041,
+   "val_token_accuracy": 0.9756769160165213,
+   "lr": 0.00029898575366129145,
+   "seconds": 91.7
+  },
+  {
+   "epoch": 9,
+   "train_loss": 0.13092329381025453,
+   "val_loss": 0.05719960300733103,
+   "val_token_accuracy": 0.9784304726938963,
+   "lr": 0.0002977211629518312,
+   "seconds": 81.2
+  },
+  {
+   "epoch": 10,
+   "train_loss": 0.09868119246374327,
+   "val_loss": 0.03365370884072676,
+   "val_token_accuracy": 0.992198256080771,
+   "lr": 0.00029595673058697357,
+   "val_sequence_accuracy": 0.5652173913043478,
+   "seconds": 7374.3
+  },
+  {
+   "epoch": 11,
+   "train_loss": 0.06603723592855237,
+   "val_loss": 0.021090744508617566,
+   "val_token_accuracy": 0.9935750344194585,
+   "lr": 0.00029369842684732334,
+   "seconds": 73.1
+  },
+  {
+   "epoch": 12,
+   "train_loss": 0.04994661742880587,
+   "val_loss": 0.014433879564683363,
+   "val_token_accuracy": 0.9963285910968334,
+   "lr": 0.0002909538931178862,
+   "seconds": 77.4
+  },
+  {
+   "epoch": 13,
+   "train_loss": 0.04284347618189988,
+   "val_loss": 0.015259514594841244,
+   "val_token_accuracy": 0.9958696649839376,
+   "lr": 0.0002877324160320411,
+   "seconds": 81.3
+  },
+  {
+   "epoch": 14,
+   "train_loss": 0.033813206362213626,
+   "val_loss": 0.008108113579620437,
+   "val_token_accuracy": 0.9977053694355209,
+   "lr": 0.0002840448960485118,
+   "seconds": 76.6
+  },
+  {
+   "epoch": 15,
+   "train_loss": 0.027099241726219928,
+   "val_loss": 0.013825696390831673,
+   "val_token_accuracy": 0.9949518127581459,
+   "lr": 0.0002799038105676658,
+   "val_sequence_accuracy": 0.6521739130434783,
+   "seconds": 90.7
+  },
+  {
+   "epoch": 16,
+   "train_loss": 0.022560978624310613,
+   "val_loss": 0.008176889127789697,
+   "val_token_accuracy": 0.9977053694355209,
+   "lr": 0.00027532317171194046,
+   "seconds": 77.1
+  },
+  {
+   "epoch": 17,
+   "train_loss": 0.017324804691332903,
+   "val_loss": 0.006967963081408,
+   "val_token_accuracy": 0.9977053694355209,
+   "lr": 0.00027031847891325657,
+   "seconds": 81.2
+  },
+  {
+   "epoch": 18,
+   "train_loss": 0.014370030342541059,
+   "val_loss": 0.0061057049614608545,
+   "val_token_accuracy": 0.9981642955484167,
+   "lr": 0.00026490666646784665,
+   "seconds": 91.7
+  },
+  {
+   "epoch": 19,
+   "train_loss": 0.0128642042190059,
+   "val_loss": 0.00783927317242001,
+   "val_token_accuracy": 0.997246443322625,
+   "lr": 0.0002591060462359573,
+   "seconds": 95.3
+  },
+  {
+   "epoch": 20,
+   "train_loss": 0.012954201205499458,
+   "val_loss": 0.0055871035327973335,
+   "val_token_accuracy": 0.997246443322625,
+   "lr": 0.00025293624568031,
+   "val_sequence_accuracy": 0.8260869565217391,
+   "seconds": 99.9
+  },
+  {
+   "epoch": 21,
+   "train_loss": 0.011989258644858815,
+   "val_loss": 0.0052193130074584355,
+   "val_token_accuracy": 0.9981642955484167,
+   "lr": 0.0002464181414529809,
+   "seconds": 79.6
+  },
+  {
+   "epoch": 22,
+   "train_loss": 0.009973668467867113,
+   "val_loss": 0.010119887526621919,
+   "val_token_accuracy": 0.9967875172097292,
+   "lr": 0.00023957378875541792,
+   "seconds": 87.6
+  },
+  {
+   "epoch": 23,
+   "train_loss": 0.010246637664666566,
+   "val_loss": 0.005230358398148466,
+   "val_token_accuracy": 0.9986232216613126,
+   "lr": 0.0002324263467106209,
+   "seconds": 92.8
+  },
+  {
+   "epoch": 24,
+   "train_loss": 0.009885978193774802,
+   "val_loss": 0.0053284840745177805,
+   "val_token_accuracy": 0.9986232216613126,
+   "lr": 0.000225,
+   "seconds": 75.4
+  },
+  {
+   "epoch": 25,
+   "train_loss": 0.006675835180498258,
+   "val_loss": 0.003929356324910423,
+   "val_token_accuracy": 0.9990821477742083,
+   "lr": 0.00021731987703006933,
+   "val_sequence_accuracy": 0.9130434782608695,
+   "seconds": 88.7
+  },
+  {
+   "epoch": 26,
+   "train_loss": 0.008477987301392379,
+   "val_loss": 0.0029409385900724355,
+   "val_token_accuracy": 0.9986232216613126,
+   "lr": 0.0002094119649058735,
+   "seconds": 75.8
+  },
+  {
+   "epoch": 27,
+   "train_loss": 0.00737093073506453,
+   "val_loss": 0.0024278300708333333,
+   "val_token_accuracy": 0.9986232216613126,
+   "lr": 0.00020130302149885031,
+   "seconds": 75.2
+  },
+  {
+   "epoch": 28,
+   "train_loss": 0.005743137271898044,
+   "val_loss": 0.0024036287590062065,
+   "val_token_accuracy": 0.9990821477742083,
+   "lr": 0.00019302048490666353,
+   "seconds": 78.0
+  },
+  {
+   "epoch": 29,
+   "train_loss": 0.005437290363607824,
+   "val_loss": 0.003751258103968939,
+   "val_token_accuracy": 0.9981642955484167,
+   "lr": 0.00018459238061136602,
+   "seconds": 75.9
+  },
+  {
+   "epoch": 30,
+   "train_loss": 0.005723879335778827,
+   "val_loss": 0.001607965445893929,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 0.00017604722665003956,
+   "val_sequence_accuracy": 0.9565217391304348,
+   "seconds": 75.5
+  },
+  {
+   "epoch": 31,
+   "train_loss": 0.00468821542512622,
+   "val_loss": 0.0020441938474917115,
+   "val_token_accuracy": 0.9990821477742083,
+   "lr": 0.00016741393711878453,
+   "seconds": 61.1
+  },
+  {
+   "epoch": 32,
+   "train_loss": 0.0038280851667287286,
+   "val_loss": 0.0017088268533959803,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 0.00015872172433657134,
+   "seconds": 66.3
+  },
+  {
+   "epoch": 33,
+   "train_loss": 0.0037196454392088253,
+   "val_loss": 0.00145889821986122,
+   "val_token_accuracy": 0.9990821477742083,
+   "lr": 0.00015,
+   "seconds": 64.2
+  },
+  {
+   "epoch": 34,
+   "train_loss": 0.003984869522884284,
+   "val_loss": 0.0010120865723326335,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 0.00014127827566342863,
+   "seconds": 65.1
+  },
+  {
+   "epoch": 35,
+   "train_loss": 0.003628734378460968,
+   "val_loss": 0.0009135434163544975,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 0.00013258606288121542,
+   "val_sequence_accuracy": 0.9565217391304348,
+   "seconds": 84.1
+  },
+  {
+   "epoch": 36,
+   "train_loss": 0.00291792342923563,
+   "val_loss": 0.0006209297415327252,
+   "val_token_accuracy": 1.0,
+   "lr": 0.00012395277334996044,
+   "seconds": 88.1
+  },
+  {
+   "epoch": 37,
+   "train_loss": 0.0022645785273717983,
+   "val_loss": 0.00118750926192543,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 0.00011540761938863397,
+   "seconds": 75.9
+  },
+  {
+   "epoch": 38,
+   "train_loss": 0.0024269001636931004,
+   "val_loss": 0.0015972166415079555,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 0.0001069795150933365,
+   "seconds": 79.3
+  },
+  {
+   "epoch": 39,
+   "train_loss": 0.0028003851772543616,
+   "val_loss": 0.0009836062994974094,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 9.869697850114969e-05,
+   "seconds": 79.0
+  },
+  {
+   "epoch": 40,
+   "train_loss": 0.002017717353296777,
+   "val_loss": 0.0005701089905031681,
+   "val_token_accuracy": 1.0,
+   "lr": 9.058803509412646e-05,
+   "val_sequence_accuracy": 1.0,
+   "seconds": 93.3
+  },
+  {
+   "epoch": 41,
+   "train_loss": 0.0019229217259521044,
+   "val_loss": 0.0003970250436279003,
+   "val_token_accuracy": 1.0,
+   "lr": 8.268012296993067e-05,
+   "seconds": 82.5
+  },
+  {
+   "epoch": 42,
+   "train_loss": 0.0020963576319238167,
+   "val_loss": 0.0009861429148707744,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 7.500000000000002e-05,
+   "seconds": 73.7
+  },
+  {
+   "epoch": 43,
+   "train_loss": 0.002349701731854465,
+   "val_loss": 0.0014194312186657607,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 6.75736532893791e-05,
+   "seconds": 76.5
+  },
+  {
+   "epoch": 44,
+   "train_loss": 0.0016822796521354917,
+   "val_loss": 0.0010293380470534838,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 6.04262112445821e-05,
+   "seconds": 75.0
+  },
+  {
+   "epoch": 45,
+   "train_loss": 0.001926941113204131,
+   "val_loss": 0.0005065933143559325,
+   "val_token_accuracy": 1.0,
+   "lr": 5.358185854701909e-05,
+   "val_sequence_accuracy": 1.0,
+   "seconds": 86.1
+  },
+  {
+   "epoch": 46,
+   "train_loss": 0.0014105773510835837,
+   "val_loss": 0.0006341260461111695,
+   "val_token_accuracy": 1.0,
+   "lr": 4.706375431968997e-05,
+   "seconds": 73.6
+  },
+  {
+   "epoch": 47,
+   "train_loss": 0.001326253578934343,
+   "val_loss": 0.0013835971206040884,
+   "val_token_accuracy": 0.9995410738871042,
+   "lr": 4.089395376404269e-05,
+   "seconds": 78.4
+  },
+  {
+   "epoch": 48,
+   "train_loss": 0.0014893037096473708,
+   "val_loss": 0.0004274364707737387,
+   "val_token_accuracy": 1.0,
+   "lr": 3.509333353215331e-05,
+   "seconds": 76.4
+  },
+  {
+   "epoch": 49,
+   "train_loss": 0.0015209226932545955,
+   "val_loss": 0.0004282565245160362,
+   "val_token_accuracy": 1.0,
+   "lr": 2.9681521086743422e-05,
+   "seconds": 75.4
+  },
+  {
+   "epoch": 50,
+   "train_loss": 0.0016278669608864042,
+   "val_loss": 0.0003938159112184479,
+   "val_token_accuracy": 1.0,
+   "lr": 2.4676828288059558e-05,
+   "val_sequence_accuracy": 1.0,
+   "seconds": 87.9
+  },
+  {
+   "epoch": 51,
+   "train_loss": 0.0014170391488987982,
+   "val_loss": 0.0003490170155170606,
+   "val_token_accuracy": 1.0,
+   "lr": 2.009618943233419e-05,
+   "seconds": 75.4
+  },
+  {
+   "epoch": 52,
+   "train_loss": 0.001502918423688509,
+   "val_loss": 0.00033172317164285024,
+   "val_token_accuracy": 1.0,
+   "lr": 1.5955103951488173e-05,
+   "seconds": 73.8
+  },
+  {
+   "epoch": 53,
+   "train_loss": 0.0013516970655657427,
+   "val_loss": 0.00033161400615330826,
+   "val_token_accuracy": 1.0,
+   "lr": 1.2267583967958916e-05,
+   "seconds": 73.0
+  },
+  {
+   "epoch": 54,
+   "train_loss": 0.001217582563621167,
+   "val_loss": 0.0003199590847794584,
+   "val_token_accuracy": 1.0,
+   "lr": 9.046106882113751e-06,
+   "seconds": 74.9
+  },
+  {
+   "epoch": 55,
+   "train_loss": 0.001469616486204784,
+   "val_loss": 0.00030479025183693893,
+   "val_token_accuracy": 1.0,
+   "lr": 6.301573152676664e-06,
+   "val_sequence_accuracy": 1.0,
+   "seconds": 85.8
+  },
+  {
+   "epoch": 56,
+   "train_loss": 0.0013481445133917587,
+   "val_loss": 0.0003185754560495967,
+   "val_token_accuracy": 1.0,
+   "lr": 4.043269413026429e-06,
+   "seconds": 76.3
+  },
+  {
+   "epoch": 57,
+   "train_loss": 0.0013882366381862267,
+   "val_loss": 0.0003231811379539828,
+   "val_token_accuracy": 1.0,
+   "lr": 2.2788370481687965e-06,
+   "seconds": 73.1
+  },
+  {
+   "epoch": 58,
+   "train_loss": 0.0010819395815639629,
+   "val_loss": 0.000326739768660061,
+   "val_token_accuracy": 1.0,
+   "lr": 1.0142463387085464e-06,
+   "seconds": 69.8
+  },
+  {
+   "epoch": 59,
+   "train_loss": 0.0013285713251105005,
+   "val_loss": 0.000326937352441347,
+   "val_token_accuracy": 1.0,
+   "lr": 2.5377625930977363e-07,
+   "seconds": 72.8
+  },
+  {
+   "epoch": 60,
+   "train_loss": 0.0012182245744328422,
+   "val_loss": 0.0003264168897365229,
+   "val_token_accuracy": 1.0,
+   "lr": 0.0,
+   "val_sequence_accuracy": 1.0,
+   "seconds": 90.0
+  }
+ ],
+ "best_epoch": 60,
+ "best_val_sequence_accuracy": 1.0,
+ "test": {
+  "n": 23,
+  "token_accuracy": 0.999554367201426,
+  "sequence_accuracy": 0.9565217391304348,
+  "symbolic_accuracy": 0.9565217391304348,
+  "greedy_sequence_accuracy": 0.9565217391304348,
+  "valid_expressions": 1.0
+ },
+ "predictions": [
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-2.txt",
+   "line": 32,
+   "amp_tokens": 359,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-5.txt",
+   "line": 14,
+   "amp_tokens": 361,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_b INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 3 2 * ^ g INT+ 4 * ^ m_b INT+ 2 s_14 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_b INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 3 2 * ^ g INT+ 4 * ^ m_b INT+ 2 s_14 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-0.txt",
+   "line": 10,
+   "amp_tokens": 248,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_d INT+ 2 ^ m_u INT+ 2 + * INT- 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_u INT+ 2 s_24 + * INT+ 1 6 * ^ g INT+ 4 * s_12 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_d INT+ 2 ^ m_u INT+ 2 + * INT- 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_u INT+ 2 s_24 + * INT+ 1 6 * ^ g INT+ 4 * s_12 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-4.txt",
+   "line": 15,
+   "amp_tokens": 360,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_c INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_c INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_c INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_c INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-1.txt",
+   "line": 7,
+   "amp_tokens": 358,
+   "prediction": "/ + * INT- 1 2 8 * ^ g INT+ 4 ^ m_d INT+ 4 + * INT- 6 4 * ^ g INT+ 4 * ^ m_d INT+ 2 s_12 + * INT+ 6 4 * ^ g INT+ 4 * ^ m_d INT+ 2 s_14 + * INT+ 1 2 8 * ^ g INT+ 4 * ^ m_d INT+ 2 s_24 * INT+ 6 4 * ^ g INT+ 4 * s_14 s_24 * INT+ 2 7 ^ + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT- 1 2 8 * ^ g INT+ 4 ^ m_d INT+ 4 + * INT- 6 4 * ^ g INT+ 4 * ^ m_d INT+ 2 s_12 + * INT+ 6 4 * ^ g INT+ 4 * ^ m_d INT+ 2 s_14 + * INT+ 1 2 8 * ^ g INT+ 4 * ^ m_d INT+ 2 s_24 * INT+ 6 4 * ^ g INT+ 4 * s_14 s_24 * INT+ 2 7 ^ + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-4.txt",
+   "line": 23,
+   "amp_tokens": 362,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_c INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 3 2 * ^ g INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_c INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 3 2 * ^ g INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-2.txt",
+   "line": 19,
+   "amp_tokens": 254,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_b INT+ 2 ^ m_s INT+ 2 + * INT- 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_24 + * INT+ 1 6 * ^ g INT+ 4 * s_12 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_s INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_b INT+ 2 ^ m_s INT+ 2 + * INT- 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_24 + * INT+ 1 6 * ^ g INT+ 4 * s_12 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_s INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-1.txt",
+   "line": 36,
+   "amp_tokens": 359,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_d INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_d INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_d INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_d INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-5.txt",
+   "line": 7,
+   "amp_tokens": 358,
+   "prediction": "/ + * INT- 1 2 8 * ^ g INT+ 4 ^ m_b INT+ 4 + * INT- 6 4 * ^ g INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 6 4 * ^ g INT+ 4 * ^ m_b INT+ 2 s_14 + * INT+ 1 2 8 * ^ g INT+ 4 * ^ m_b INT+ 2 s_24 * INT+ 6 4 * ^ g INT+ 4 * s_14 s_24 * INT+ 2 7 ^ + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT- 1 2 8 * ^ g INT+ 4 ^ m_b INT+ 4 + * INT- 6 4 * ^ g INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 6 4 * ^ g INT+ 4 * ^ m_b INT+ 2 s_14 + * INT+ 1 2 8 * ^ g INT+ 4 * ^ m_b INT+ 2 s_24 * INT+ 6 4 * ^ g INT+ 4 * s_14 s_24 * INT+ 2 7 ^ + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-4.txt",
+   "line": 26,
+   "amp_tokens": 362,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_c INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 3 2 * ^ g INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_c INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 3 2 * ^ g INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-4.txt",
+   "line": 11,
+   "amp_tokens": 246,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_b INT+ 2 ^ m_c INT+ 2 + * INT- 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_24 + * INT+ 1 6 * ^ g INT+ 4 * s_12 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_c INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_b INT+ 2 ^ m_c INT+ 2 + * INT- 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_c INT+ 2 s_24 + * INT+ 1 6 * ^ g INT+ 4 * s_12 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_c INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-0.txt",
+   "line": 30,
+   "amp_tokens": 360,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_u INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_u INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_u INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_u INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-2.txt",
+   "line": 25,
+   "amp_tokens": 360,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-2.txt",
+   "line": 22,
+   "amp_tokens": 361,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-4.txt",
+   "line": 25,
+   "amp_tokens": 2272,
+   "prediction": "/ + * INT+ 2 0 * ^ g INT+ 4 ^ m_c INT+ 4 + * INT+ 1 0 * ^ g INT+ 4 ^ s_13 INT+ 2 + * INT- 3 0 * ^ g INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 4 * ^ g INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 4 * ^ g INT+ 4 * ^ m_c INT+ 2 s_34 + * INT+ 2 * ^ g INT+ 4 * s_13 s_14 + * INT- 2 * ^ g INT+ 4 * s_13 s_34 * INT+ 1 0 * ^ g INT+ 4 * s_14 s_34 ^ + * INT+ 2 ^ m_c INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 2 0 * ^ g INT+ 4 ^ m_c INT+ 4 + * INT+ 1 0 * ^ g INT+ 4 ^ s_13 INT+ 2 + * INT- 3 0 * ^ g INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 4 * ^ g INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 4 * ^ g INT+ 4 * ^ m_c INT+ 2 s_34 + * INT+ 2 * ^ g INT+ 4 * s_13 s_14 + * INT- 2 * ^ g INT+ 4 * s_13 s_34 * INT+ 1 0 * ^ g INT+ 4 * s_14 s_34 ^ + * INT+ 2 ^ m_c INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-6.txt",
+   "line": 10,
+   "amp_tokens": 2181,
+   "prediction": "/ + * INT+ 2 0 * ^ g INT+ 4 ^ m_t INT+ 4 + * INT+ 1 0 * ^ g INT+ 4 ^ s_13 INT+ 2 + * INT- 3 0 * ^ g INT+ 4 * ^ m_t INT+ 2 s_13 + * INT- 4 * ^ g INT+ 4 * ^ m_t INT+ 2 s_14 + * INT+ 4 * ^ g INT+ 4 * ^ m_t INT+ 2 s_34 + * INT+ 2 * ^ g INT+ 4 * s_13 s_14 + * INT- 2 * ^ g INT+ 4 * s_13 s_34 * INT+ 1 0 * ^ g INT+ 4 * s_14 s_34 ^ + * INT+ 2 ^ m_t INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT- 3 0 * ^ g INT+ 4 ^ m_t INT+ 4 + * INT- 1 5 * ^ g INT+ 4 ^ s_34 INT+ 2 + * INT+ 6 * ^ g INT+ 4 * ^ m_t INT+ 2 s_23 + * INT+ 6 * ^ g INT+ 4 * ^ m_t INT+ 2 s_24 + * INT- 4 5 * ^ g INT+ 4 * ^ m_t INT+ 2 s_34 + * INT+ 1 5 * ^ g INT+ 4 * s_23 s_24 + * INT+ 3 * ^ g INT+ 4 * s_23 s_34 * INT+ 3 * ^ g INT+ 4 * s_24 s_34 * INT+ 4 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": false
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-2.txt",
+   "line": 28,
+   "amp_tokens": 360,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-2.txt",
+   "line": 24,
+   "amp_tokens": 2257,
+   "prediction": "/ + * INT+ 2 0 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT+ 1 0 * ^ g INT+ 4 ^ s_13 INT+ 2 + * INT- 3 0 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 4 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 4 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 + * INT+ 2 * ^ g INT+ 4 * s_13 s_14 + * INT- 2 * ^ g INT+ 4 * s_13 s_34 * INT+ 1 0 * ^ g INT+ 4 * s_14 s_34 ^ + * INT+ 2 ^ m_s INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 2 0 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT+ 1 0 * ^ g INT+ 4 ^ s_13 INT+ 2 + * INT- 3 0 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 4 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 4 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 + * INT+ 2 * ^ g INT+ 4 * s_13 s_14 + * INT- 2 * ^ g INT+ 4 * s_13 s_34 * INT+ 1 0 * ^ g INT+ 4 * s_14 s_34 ^ + * INT+ 2 ^ m_s INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-6.txt",
+   "line": 4,
+   "amp_tokens": 2181,
+   "prediction": "/ + * INT- 3 0 * ^ g INT+ 4 ^ m_d INT+ 4 + * INT- 1 5 * ^ g INT+ 4 ^ s_34 INT+ 2 + * INT+ 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_23 + * INT+ 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_24 + * INT- 4 5 * ^ g INT+ 4 * ^ m_d INT+ 2 s_34 + * INT+ 1 5 * ^ g INT+ 4 * s_23 s_24 + * INT+ 3 * ^ g INT+ 4 * s_23 s_34 * INT+ 3 * ^ g INT+ 4 * s_24 s_34 * INT+ 4 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT- 3 0 * ^ g INT+ 4 ^ m_d INT+ 4 + * INT- 1 5 * ^ g INT+ 4 ^ s_34 INT+ 2 + * INT+ 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_23 + * INT+ 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_24 + * INT- 4 5 * ^ g INT+ 4 * ^ m_d INT+ 2 s_34 + * INT+ 1 5 * ^ g INT+ 4 * s_23 s_24 + * INT+ 3 * ^ g INT+ 4 * s_23 s_34 * INT+ 3 * ^ g INT+ 4 * s_24 s_34 * INT+ 4 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-2.txt",
+   "line": 23,
+   "amp_tokens": 360,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 ^ m_s INT+ 4 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 1 6 * ^ g INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 3 2 * ^ g INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_34 * INT+ 9 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-5.txt",
+   "line": 2,
+   "amp_tokens": 237,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_b INT+ 2 ^ m_d INT+ 2 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_34 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_12 + * INT+ 1 6 * ^ g INT+ 4 * s_13 s_24 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_b INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_b INT+ 2 ^ m_d INT+ 2 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_b INT+ 2 s_34 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_12 + * INT+ 1 6 * ^ g INT+ 4 * s_13 s_24 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_b INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-0.txt",
+   "line": 3,
+   "amp_tokens": 245,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_t INT+ 2 ^ m_u INT+ 2 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_t INT+ 2 s_12 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_u INT+ 2 s_34 + * INT+ 1 6 * ^ g INT+ 4 * s_13 s_24 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_t INT+ 2 ^ m_u INT+ 2 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_t INT+ 2 s_12 + * INT+ 1 6 * ^ g INT+ 4 * ^ m_u INT+ 2 s_34 + * INT+ 1 6 * ^ g INT+ 4 * s_13 s_24 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QCD-2-to-2-diag-TreeLevel-1.txt",
+   "line": 15,
+   "amp_tokens": 254,
+   "prediction": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_d INT+ 2 ^ m_t INT+ 2 + * INT- 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_24 + * INT- 1 6 * ^ g INT+ 4 * ^ m_t INT+ 2 s_13 + * INT+ 1 6 * ^ g INT+ 4 * s_12 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 3 2 * ^ g INT+ 4 * ^ m_d INT+ 2 ^ m_t INT+ 2 + * INT- 1 6 * ^ g INT+ 4 * ^ m_d INT+ 2 s_24 + * INT- 1 6 * ^ g INT+ 4 * ^ m_t INT+ 2 s_13 + * INT+ 1 6 * ^ g INT+ 4 * s_12 s_34 * INT+ 1 6 * ^ g INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  }
+ ],
+ "expert_routing": {
+  "token_types": [
+   "SPECIAL",
+   "OP",
+   "DIGIT",
+   "MASS",
+   "MANDELSTAM",
+   "COUPLING",
+   "REGPROP",
+   "STRUCT"
+  ],
+  "counts": [
+   [
+    [
+     0,
+     25,
+     3,
+     1
+    ],
+    [
+     351,
+     83,
+     207,
+     616
+    ],
+    [
+     39,
+     223,
+     285,
+     3
+    ],
+    [
+     37,
+     63,
+     0,
+     0
+    ],
+    [
+     42,
+     42,
+     61,
+     19
+    ],
+    [
+     0,
+     126,
+     0,
+     1
+    ],
+    [
+     0,
+     23,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   [
+    [
+     26,
+     2,
+     1,
+     0
+    ],
+    [
+     472,
+     191,
+     173,
+     421
+    ],
+    [
+     79,
+     327,
+     116,
+     28
+    ],
+    [
+     28,
+     0,
+     68,
+     4
+    ],
+    [
+     7,
+     137,
+     11,
+     9
+    ],
+    [
+     19,
+     0,
+     108,
+     0
+    ],
+    [
+     0,
+     23,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0
+    ]
+   ]
+  ]
+ }
+}

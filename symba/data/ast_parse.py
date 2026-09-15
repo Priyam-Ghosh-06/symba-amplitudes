@@ -1,8 +1,8 @@
-r"""S4a - LALR grammar over the amplitude, flattened to prefix notation.
+r"""Amplitude -> abstract syntax tree -> prefix (Polish) token sequence.
 
-Unchanged in substance from the tokenisation notebook: it parses 594/594
-amplitudes with zero failures. What changed is that a failure now raises
-instead of writing ``[<UNK>]`` into the record (02 SS6 rule 1).
+An LALR grammar parses the amplitude; the tree is written out in prefix order,
+which removes every bracket while keeping the nesting. Numbers are split into
+digits so the vocabulary stays small.
 """
 
 import re
@@ -48,7 +48,7 @@ QFT_GRAMMAR = r"""
 
 
 class QFTPrefixTransformer(Transformer):
-    """Parse tree to a flat prefix token list."""
+    """Parse tree -> flat prefix token list."""
 
     def _binary_flatten(self, args):
         if len(args) == 1:
@@ -81,12 +81,9 @@ _parser = Lark(QFT_GRAMMAR, parser="lalr")
 _transformer = QFTPrefixTransformer()
 
 
-def preprocess(eq: str) -> str:
-    """Make implicit structure explicit before parsing.
-
-    Inserts ``@`` for function application and re-brackets chained subscripts
-    so the grammar never has to guess a nesting.
-    """
+def preprocess(eq):
+    """Make implicit structure explicit: ``@`` for function application, and
+    braces around chained subscripts so the grammar never guesses a nesting."""
     eq = re.sub(r"([\}\)])([\(])", r"\1 @ \2", eq)
     eq = re.sub(r"([a-zA-Z0-9])([\(])", r"\1 @ \2", eq)
     eq = re.sub(r"([a-zA-Z]_\d+)_([+-]?(?:%?\\?[a-zA-Z]+)_[a-zA-Z0-9]+)",
@@ -98,24 +95,21 @@ def preprocess(eq: str) -> str:
     return eq
 
 
-def amp_to_prefix(equation: str) -> list:
-    """preprocess -> LALR parse -> prefix token list. Raises on a parse failure."""
+def amp_to_prefix(equation):
     return _transformer.transform(_parser.parse(preprocess(equation)))
 
 
-def _subtree_size(node) -> int:
+def _subtree_size(node):
     if not isinstance(node, Tree):
         return 1
     return 1 + sum(_subtree_size(c) for c in node.children)
 
 
 def _largest_addition(tree):
-    """The addition node with the biggest subtree, or None if there is none.
+    """The sum node with the biggest subtree: the sum over Feynman diagrams.
 
-    The amplitude's sum over diagrams is not at the root - a QCD amplitude
-    parses as ``/ * * * ... + + + ...``, with the sum nested under the overall
-    prefactor - so the diagram structure has to be searched for rather than
-    assumed.
+    It is not at the root - the amplitude parses as ``prefactor * (sum)`` - so
+    it is searched for.
     """
     best, stack = None, [tree]
     while stack:
@@ -129,48 +123,24 @@ def _largest_addition(tree):
     return best
 
 
-def amp_to_segments(equation: str) -> list:
-    """Split an amplitude into per-diagram prefix segments.
+def amp_to_segments(equation):
+    """The amplitude split at its largest sum into one prefix sequence per term.
 
-    The amplitude is a sum over Feynman diagrams. Encoding each diagram
-    separately with shared weights turns the encoder's attention cost from
-    ``(sum_d L_d)^2`` into ``sum_d L_d^2`` and injects the permutation
-    invariance over diagrams that the physics already has (01 SS4.2 option 2).
-
-    Measured on this corpus: QCD encoder attention work falls 10.7x and the
-    longest segment goes from 2859 tokens to 239. QED gains 1.9x - less,
-    because its amplitudes were short to begin with.
-
-    Returns a list of token lists. The first segment carries the surrounding
-    prefactor context; the rest are the individual diagrams.
+    For a multi-diagram amplitude that sum is the sum over Feynman diagrams, so
+    each segment is one diagram. The first segment is the rest of the
+    expression, with the sum replaced by a ``<diagrams>`` placeholder.
     """
     tree = _parser.parse(preprocess(equation))
     addition = _largest_addition(tree)
-    if addition is None:
-        return [_transformer.transform(tree)]
-
-    terms = [c for c in addition.children if isinstance(c, Tree)]
+    terms = [c for c in addition.children if isinstance(c, Tree)] if addition else []
     if len(terms) < 2:
         return [_transformer.transform(tree)]
 
-    # Replace the addition with a placeholder so the context segment keeps the
-    # prefactor and the operator skeleton without duplicating the diagrams.
-    segments = []
-    for term in terms:
-        segments.append(_transformer.transform(term))
-
+    segments = [_transformer.transform(term) for term in terms]
     original = addition.children
     addition.children = [Tree("var", [Token("SYMBOL", "<diagrams>")])]
     try:
         context = _transformer.transform(tree)
     finally:
         addition.children = original
-
     return [context] + segments
-
-
-def parse_amp_record(record, segment: bool = True):
-    record["amp_tokens"] = amp_to_prefix(record["amp_std"])
-    record["amp_segments"] = (amp_to_segments(record["amp_std"]) if segment
-                              else [record["amp_tokens"]])
-    return record

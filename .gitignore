@@ -5,5 +5,5 @@ __pycache__/
 venv/
 checkpoints/
 *.pt
-results/log_*.txt
+logs/
 .DS_Store

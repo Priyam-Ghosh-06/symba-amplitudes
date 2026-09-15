@@ -1,70 +1,46 @@
-"""S6 - vocabulary, built from the training split only.
-
-The previous tokeniser counted tokens over the whole corpus and split two cells
-later (02 SS2.3). Here construction takes a single list and the caller is the
-training split; gate G8 asserts that ordering, and gate G7 reports the OOV rate
-on val/test rather than hiding it behind an ``<unk>``.
-"""
+"""Token <-> id mapping."""
 
 from collections import Counter
 
-from ..config import PAD, SOS, EOS, UNK, SPECIAL_TOKENS
+from ..config import EOS, PAD, SOS, SPECIAL_TOKENS, UNK
 from .serialize import DIGITS, type_ids
 
 
 class Vocab:
-    """Deterministic token/id mapping.
+    """Specials first, then digits (fixed ids), then tokens by frequency."""
 
-    Ids are assigned specials first, then digits (so a digit id never moves when
-    the corpus changes), then the remaining symbols sorted by ``(-count, token)``
-    - frequency for interpretability, token name to break ties reproducibly.
-    """
-
-    def __init__(self, tokens_iter, reserve_digits: bool = True):
+    def __init__(self, token_lists, reserve_digits=True):
         counts = Counter()
-        for tokens in tokens_iter:
+        for tokens in token_lists:
             counts.update(tokens)
+        fixed = SPECIAL_TOKENS + (DIGITS if reserve_digits else [])
+        rest = sorted((t for t in counts if t not in fixed), key=lambda t: (-counts[t], t))
+        self._set(fixed + rest)
 
-        self.itos = list(SPECIAL_TOKENS)
-        if reserve_digits:
-            self.itos += DIGITS
+    @classmethod
+    def from_itos(cls, itos):
+        vocab = cls([], reserve_digits=False)
+        vocab._set(list(itos))
+        return vocab
 
-        for token in sorted(counts, key=lambda t: (-counts[t], t)):
-            if token not in self.itos:
-                self.itos.append(token)
-
-        self.stoi = {token: i for i, token in enumerate(self.itos)}
-        self.counts = counts
+    def _set(self, itos):
+        self.itos = itos
+        self.stoi = {t: i for i, t in enumerate(itos)}
 
     def __len__(self):
         return len(self.itos)
 
-    def encode(self, tokens, add_bos_eos: bool = True) -> list:
-        ids = [self.stoi.get(t, UNK) for t in tokens]
-        return [SOS] + ids + [EOS] if add_bos_eos else ids
+    def encode(self, tokens):
+        return [SOS] + [self.stoi.get(t, UNK) for t in tokens] + [EOS]
 
-    def decode(self, ids, strip_special: bool = True) -> list:
+    def decode(self, ids):
         out = []
         for i in ids:
             if i == EOS:
                 break
-            if strip_special and i in (PAD, SOS, UNK):
-                continue
-            out.append(self.itos[i])
+            if i not in (PAD, SOS, UNK):
+                out.append(self.itos[i])
         return out
 
-    def type_ids(self) -> list:
-        """Type id per vocabulary entry, for the type embedding channel."""
+    def type_ids(self):
         return type_ids(self.itos)
-
-    def oov_rate(self, tokens_iter):
-        """Gate G7: fraction of tokens in a held-out split absent from here."""
-        total = missing = 0
-        unseen = Counter()
-        for tokens in tokens_iter:
-            for token in tokens:
-                total += 1
-                if token not in self.stoi:
-                    missing += 1
-                    unseen[token] += 1
-        return (missing / total if total else 0.0), unseen

@@ -1,221 +1,183 @@
-"""Tensors, dynamic padding, and padding masks.
+"""Raw corpus -> preprocessed records -> train / val / test DataLoaders."""
 
-Two properties the previous dataset lacked and that everything downstream
-depends on:
-
-* the tensors are built from ``graph_tokens`` / ``amp_tokens`` / ``target_tokens``
-  - the parsed streams - never from the raw strings (gate G9);
-* nothing is truncated. Padding is per batch, and a sequence longer than the
-  declared budget raises rather than being clipped (gate G10).
-"""
-
-from collections import defaultdict
+import random
+from dataclasses import dataclass
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 
 from ..config import PAD
+from .ast_parse import amp_to_prefix, amp_to_segments
+from .canonical import canonicalise
+from .graph import FeynmanGraph
+from .load import load_theory
+from .normalize import standardize, strip_keywords
+from .serialize import target_tokens
+from .vocab import Vocab
 
 
-class AmplitudeDataset(Dataset):
-    """One item per record: graph ids, amp ids, target ids, and metadata."""
+def preprocess(record):
+    """Add the token streams the model reads to a raw record.
 
-    FIELDS = ("graph_tokens", "amp_tokens", "target_tokens")
-
-    def __init__(self, records, graph_vocab, amp_vocab, target_vocab,
-                 max_lengths=None, max_segment_length=None):
-        self.records = records
-        self.vocabs = (graph_vocab, amp_vocab, target_vocab)
-        self.max_lengths = max_lengths
-        self.max_segment_length = max_segment_length
-
-        self.items = []
-        for record in records:
-            ids = []
-            for field, vocab in zip(self.FIELDS, self.vocabs):
-                # Direct indexing, not .get(...): a missing field is a pipeline
-                # bug and must raise here rather than become an empty tensor.
-                encoded = vocab.encode(record[field])
-                ids.append(encoded)
-
-            if max_lengths is not None:
-                for name, encoded, limit in zip(self.FIELDS, ids, max_lengths):
-                    if len(encoded) > limit:
-                        raise ValueError(
-                            f"{record.source_file}:{record.line_no} {name} is "
-                            f"{len(encoded)} tokens, over the budget of {limit}")
-
-            # One tensor per diagram. With segmentation off this is a single
-            # segment holding the whole amplitude, so the two paths share code.
-            segments = [torch.tensor(amp_vocab.encode(seg), dtype=torch.long)
-                        for seg in record["amp_segments"]]
-
-            # The math encoder's positional table is sized from the longest
-            # segment, so an over-budget diagram would index past it. Raise,
-            # never clip (01 P2).
-            if max_segment_length is not None:
-                longest = max(t.size(0) for t in segments)
-                if longest > max_segment_length:
-                    raise ValueError(
-                        f"{record.source_file}:{record.line_no} longest diagram "
-                        f"is {longest} tokens, over the budget of "
-                        f"{max_segment_length}")
-
-            self.items.append({
-                "graph": torch.tensor(ids[0], dtype=torch.long),
-                "amp": torch.tensor(ids[1], dtype=torch.long),
-                "amp_segments": segments,
-                "target": torch.tensor(ids[2], dtype=torch.long),
-                "index": len(self.items),
-                "template": record["template"],
-            })
-
-    def __len__(self):
-        return len(self.items)
-
-    def __getitem__(self, idx):
-        return self.items[idx]
-
-    def record(self, index: int):
-        return self.records[index]
-
-    def lengths(self):
-        """Max encoded length per stream, for allocating positional tables."""
-        return tuple(max(item[key].size(0) for item in self.items)
-                     for key in ("graph", "amp", "target"))
-
-    def segment_length(self) -> int:
-        """Longest single diagram, which is what the math encoder attends over."""
-        return max(t.size(0) for item in self.items
-                   for t in item["amp_segments"])
-
-
-def _pad_stack(tensors):
-    """Pad to the longest in the batch and return ``(ids, key_padding_mask)``.
-
-    The mask is True at padding positions, matching the convention
-    ``F.scaled_dot_product_attention`` expects once inverted into an additive
-    mask, and is threaded through every attention call.
+    graph_tokens    the Feynman diagram: legs, vertices, propagators
+    amp_tokens      the amplitude as a prefix-notation syntax tree
+    amp_segments    the same amplitude, one sequence per Feynman diagram
+    target_tokens   the canonical squared amplitude in prefix notation
     """
-    longest = max(t.size(0) for t in tensors)
-    ids = torch.full((len(tensors), longest), PAD, dtype=torch.long)
+    graph = FeynmanGraph(strip_keywords(record["interaction"]),
+                         strip_keywords(record["vertices"]))
+    amp = standardize(record["amp"])
+    record["graph_tokens"] = graph.to_tokens()
+    record["amp_tokens"] = amp_to_prefix(amp)
+    record["amp_segments"] = amp_to_segments(amp)
+    if "sq_amp" in record:
+        record["target_tokens"] = target_tokens(*canonicalise(standardize(record["sq_amp"])))
+    return record
+
+
+def worth_segmenting(records):
+    """Per-diagram encoding pays when it lowers the attention cost: the sum of
+    squared lengths, with each record's diagrams padded to its longest one."""
+    flat = sum(len(r["amp_tokens"]) ** 2 for r in records)
+    per_diagram = sum(len(r["amp_segments"]) * max(map(len, r["amp_segments"])) ** 2
+                      for r in records)
+    return per_diagram < flat
+
+
+def split(records, val_frac, test_frac, seed):
+    """Random ``(train, val, test)`` split of the records."""
+    order = list(range(len(records)))
+    random.Random(seed).shuffle(order)
+    n_test, n_val = round(test_frac * len(order)), round(val_frac * len(order))
+    pick = lambda ids: [records[i] for i in ids]
+    return pick(order[n_test + n_val:]), pick(order[n_test:n_test + n_val]), pick(order[:n_test])
+
+
+def encode(record, graph_vocab, amp_vocab, target_vocab=None):
+    item = {"graph": torch.tensor(graph_vocab.encode(record["graph_tokens"])),
+            "segments": [torch.tensor(amp_vocab.encode(s)) for s in record["amp_segments"]]}
+    if target_vocab is not None:
+        item["target"] = torch.tensor(target_vocab.encode(record["target_tokens"]))
+    return item
+
+
+def _pad(tensors):
+    ids = torch.full((len(tensors), max(t.size(0) for t in tensors)), PAD, dtype=torch.long)
     for i, t in enumerate(tensors):
         ids[i, :t.size(0)] = t
-    return ids, ids.eq(PAD)
+    return ids
 
 
-def _pad_segments(batch):
-    """Stack per-diagram segments into ``(B, S, L)`` plus its padding mask.
+def collate(items):
+    """Pad items into a batch. Segments become ``(batch, diagrams, length)``."""
+    n_seg = max(len(it["segments"]) for it in items)
+    seg_len = max(s.size(0) for it in items for s in it["segments"])
+    segments = torch.full((len(items), n_seg, seg_len), PAD, dtype=torch.long)
+    for i, it in enumerate(items):
+        for j, s in enumerate(it["segments"]):
+            segments[i, j, :s.size(0)] = s
 
-    S is the largest diagram count in the batch and L the longest segment, so
-    the encoder attends within a diagram over L rather than across the whole
-    concatenated amplitude. Empty slots are all-PAD and fully masked.
-    """
-    n_seg = max(len(b["amp_segments"]) for b in batch)
-    seg_len = max(t.size(0) for b in batch for t in b["amp_segments"])
-
-    ids = torch.full((len(batch), n_seg, seg_len), PAD, dtype=torch.long)
-    for i, item in enumerate(batch):
-        for j, segment in enumerate(item["amp_segments"]):
-            ids[i, j, :segment.size(0)] = segment
-    return ids, ids.eq(PAD)
-
-
-def collate(batch):
-    graph, graph_mask = _pad_stack([b["graph"] for b in batch])
-    amp, amp_mask = _pad_stack([b["amp"] for b in batch])
-    amp_seg, amp_seg_mask = _pad_segments(batch)
-    target, target_mask = _pad_stack([b["target"] for b in batch])
-    return {
-        "graph": graph, "graph_mask": graph_mask,
-        "amp": amp, "amp_mask": amp_mask,
-        "amp_segments": amp_seg, "amp_segments_mask": amp_seg_mask,
-        "target": target, "target_mask": target_mask,
-        "index": torch.tensor([b["index"] for b in batch], dtype=torch.long),
-        "template": [b["template"] for b in batch],
-    }
+    batch = {"graph": _pad([it["graph"] for it in items]), "segments": segments}
+    batch["graph_mask"] = batch["graph"].eq(PAD)
+    batch["segments_mask"] = segments.eq(PAD)
+    if "target" in items[0]:
+        batch["target"] = _pad([it["target"] for it in items])
+    if "index" in items[0]:
+        batch["index"] = torch.tensor([it["index"] for it in items])
+    return batch
 
 
-class LengthBucketSampler(torch.utils.data.Sampler):
-    """Group similar-length items so dynamic padding actually saves work.
+class BucketSampler(torch.utils.data.Sampler):
+    """Batches of similar-sized records, so padding stays small.
 
-    Each epoch the indices are shuffled, cut into pools of ``POOL_BATCHES``
-    batches, and sorted by cost inside each pool. Batches are therefore still
-    length-homogeneous - the point of bucketing - but *which* records share a
-    batch changes every epoch.
-
-    A globally sorted order would fix batch composition for the whole run:
-    the same records would be averaged together in every gradient step, which
-    removes the minibatch noise that a 277-example training set relies on.
-    Only the visiting order was being reshuffled before, which does not change
-    a single gradient.
+    For training the records are shuffled, cut into pools of 8 batches and
+    sorted by size inside each pool, so batches still change every epoch.
     """
 
-    POOL_BATCHES = 8
-
-    def __init__(self, dataset, batch_size, shuffle=True, generator=None):
-        self.batch_size = batch_size
-        self.shuffle = shuffle
-        self.generator = generator
-
-        def cost(i):
-            # Segments are padded to a rectangle per batch, so the thing to
-            # group by is (diagram count, longest diagram) - sorting on the
-            # flat length would put a 2-diagram record next to a 14-diagram one
-            # and pad the whole batch up to the larger.
-            item = dataset[i]
-            segments = item["amp_segments"]
-            return (len(segments), max(t.size(0) for t in segments))
-
-        self.cost = [cost(i) for i in range(len(dataset))]
-        self.order = sorted(range(len(dataset)), key=lambda i: self.cost[i])
-
-    def _epoch_order(self):
-        """Reshuffle inside each diagram-count group, then sort by length.
-
-        Diagram count is the expensive axis: segments are padded to an
-        (n_diagrams x longest_diagram) rectangle, so pairing a 3-diagram QCD
-        record with a 15-diagram one pads the whole batch to 15 and costs ~4x.
-        Shuffling globally would do exactly that at every pool boundary, so the
-        shuffle happens *within* a diagram-count group and the groups stay in
-        order. On a corpus with one segment per record (QED) there is a single
-        group and this is a plain shuffled-pool sort.
-        """
-        if not self.shuffle:
-            return self.order
-
-        groups = defaultdict(list)
-        for i in self.order:
-            groups[self.cost[i][0]].append(i)
-
-        pool = max(self.batch_size, self.batch_size * self.POOL_BATCHES)
-        out = []
-        for key in sorted(groups):
-            members = groups[key]
-            perm = torch.randperm(len(members),
-                                  generator=self.generator).tolist()
-            shuffled = [members[i] for i in perm]
-            for start in range(0, len(shuffled), pool):
-                out.extend(sorted(shuffled[start:start + pool],
-                                  key=lambda i: self.cost[i]))
-        return out
+    def __init__(self, sizes, batch_size, shuffle, generator=None):
+        self.sizes, self.batch_size = sizes, batch_size
+        self.shuffle, self.generator = shuffle, generator
 
     def __iter__(self):
-        order = self._epoch_order()
-        batches = [order[i:i + self.batch_size]
-                   for i in range(0, len(order), self.batch_size)]
+        n = len(self.sizes)
         if self.shuffle:
-            perm = torch.randperm(len(batches), generator=self.generator)
-            batches = [batches[i] for i in perm.tolist()]
-        for batch in batches:
-            yield batch
+            order, pool = torch.randperm(n, generator=self.generator).tolist(), 8 * self.batch_size
+        else:
+            order, pool = list(range(n)), n
+        order = [i for s in range(0, n, pool)
+                 for i in sorted(order[s:s + pool], key=self.sizes.__getitem__)]
+        batches = [order[i:i + self.batch_size] for i in range(0, n, self.batch_size)]
+        if self.shuffle:
+            batches = [batches[i] for i in torch.randperm(len(batches), generator=self.generator)]
+        return iter(batches)
 
     def __len__(self):
-        return (len(self.order) + self.batch_size - 1) // self.batch_size
+        return -(-len(self.sizes) // self.batch_size)
 
 
-def make_loader(dataset, batch_size, shuffle=True, generator=None):
-    if len(dataset) == 0:
-        raise ValueError("empty dataset")
-    sampler = LengthBucketSampler(dataset, batch_size, shuffle, generator)
-    return DataLoader(dataset, batch_sampler=sampler, collate_fn=collate)
+@dataclass
+class Data:
+    train: list
+    val: list
+    test: list
+    graph_vocab: Vocab
+    amp_vocab: Vocab
+    target_vocab: Vocab
+    loaders: dict
+    table_sizes: tuple      # positional-table rows: graph, amplitude segment, target
+    decode_budget: int      # most tokens the decoder may emit
+    segment_amp: bool
+    stats: dict
+
+
+def build(cfg, verbose=True):
+    records = [preprocess(r) for r in load_theory(cfg.data.root, cfg.data.theory)]
+    segment_amp = cfg.data.segment_amp
+    if segment_amp is None:
+        segment_amp = worth_segmenting(records)
+    if not segment_amp:
+        for r in records:
+            r["amp_segments"] = [r["amp_tokens"]]
+
+    train, val, test = split(records, cfg.data.val_frac, cfg.data.test_frac, cfg.train.seed)
+
+    # Vocabularies see the training split only.
+    graph_vocab = Vocab((r["graph_tokens"] for r in train), reserve_digits=False)
+    amp_vocab = Vocab(s for r in train for s in r["amp_segments"])
+    target_vocab = Vocab(r["target_tokens"] for r in train)
+
+    generator = torch.Generator().manual_seed(cfg.train.seed)
+    loaders, items = {}, {}
+    for name, part in (("train", train), ("val", val), ("test", test)):
+        items[name] = [dict(encode(r, graph_vocab, amp_vocab, target_vocab), index=i)
+                       for i, r in enumerate(part)]
+        sizes = [(len(it["segments"]), max(s.size(0) for s in it["segments"]))
+                 for it in items[name]]
+        sampler = BucketSampler(sizes, cfg.train.batch_size, name == "train", generator)
+        loaders[name] = DataLoader(items[name], batch_sampler=sampler, collate_fn=collate)
+
+    every = [it for part in items.values() for it in part]
+    table_sizes = (max(it["graph"].size(0) for it in every) + 8,
+                   max(s.size(0) for it in every for s in it["segments"]) + 8,
+                   max(it["target"].size(0) for it in every) + 8)
+    # The decoder may emit up to the longest *training* target plus a margin;
+    # a longer held-out target simply cannot be produced and counts as wrong.
+    decode_budget = max(it["target"].size(0) for it in items["train"]) + 8
+
+    stats = {
+        "records": len(records), "train": len(train), "val": len(val), "test": len(test),
+        "vocab": {"graph": len(graph_vocab), "amplitude": len(amp_vocab),
+                  "target": len(target_vocab)},
+        "longest": {"sq_amp_characters": max(len(r["sq_amp"]) for r in records),
+                    "amp_tokens": max(len(r["amp_tokens"]) for r in records),
+                    "diagram_tokens": max(len(s) for r in records for s in r["amp_segments"]),
+                    "target_tokens": max(len(r["target_tokens"]) for r in records)},
+        "segment_amp": segment_amp,
+    }
+    if verbose:
+        print(f"[{cfg.data.theory}] {len(records)} records | train/val/test "
+              f"{len(train)}/{len(val)}/{len(test)} | vocab {stats['vocab']} | "
+              f"per-diagram encoding: {segment_amp}", flush=True)
+
+    return Data(train, val, test, graph_vocab, amp_vocab, target_vocab, loaders,
+                table_sizes, decode_budget, segment_amp, stats)

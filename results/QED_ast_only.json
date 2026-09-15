@@ -1,0 +1,1176 @@
+{
+ "theory": "QED",
+ "variant": "ast_only",
+ "config": {
+  "data": {
+   "root": "data/Symba",
+   "theory": "QED",
+   "val_frac": 0.1,
+   "test_frac": 0.1,
+   "segment_amp": false
+  },
+  "model": {
+   "d_model": 128,
+   "num_heads": 4,
+   "graph_layers": 2,
+   "math_layers": 2,
+   "dec_layers": 2,
+   "dim_feedforward": 512,
+   "dropout": 0.1,
+   "embedding": "role_filler",
+   "attention": "xsa",
+   "ffn": "moe",
+   "n_experts": 4,
+   "top_k": 2,
+   "moe_aux_weight": 0.01,
+   "use_graph": false,
+   "use_math": true
+  },
+  "train": {
+   "batch_size": 16,
+   "epochs": 120,
+   "lr": 0.0003,
+   "weight_decay": 0.01,
+   "warmup_frac": 0.1,
+   "grad_clip": 1.0,
+   "eval_every": 5,
+   "patience": 30,
+   "beam_width": 4,
+   "length_penalty": 0.7,
+   "seed": 42
+  }
+ },
+ "parameters": 2672512,
+ "data": {
+  "records": 360,
+  "train": 288,
+  "val": 36,
+  "test": 36,
+  "vocab": {
+   "graph": 27,
+   "amplitude": 65,
+   "target": 37
+  },
+  "longest": {
+   "sq_amp_characters": 210,
+   "amp_tokens": 262,
+   "diagram_tokens": 262,
+   "target_tokens": 103
+  },
+  "segment_amp": false
+ },
+ "minutes": 45.1,
+ "history": [
+  {
+   "epoch": 1,
+   "train_loss": 3.853047544998288,
+   "val_loss": 3.32095976142116,
+   "val_token_accuracy": 0.11317922545782047,
+   "lr": 2.638888888888889e-05,
+   "seconds": 29.2
+  },
+  {
+   "epoch": 2,
+   "train_loss": 2.9911183813418143,
+   "val_loss": 2.4692528873404664,
+   "val_token_accuracy": 0.3710597418192735,
+   "lr": 5.138888888888889e-05,
+   "seconds": 30.2
+  },
+  {
+   "epoch": 3,
+   "train_loss": 2.266598531054785,
+   "val_loss": 1.7460686132665226,
+   "val_token_accuracy": 0.560192134494146,
+   "lr": 7.638888888888889e-05,
+   "seconds": 28.4
+  },
+  {
+   "epoch": 4,
+   "train_loss": 1.6123561588097537,
+   "val_loss": 1.203787337942762,
+   "val_token_accuracy": 0.6655658961272891,
+   "lr": 0.00010138888888888889,
+   "seconds": 29.2
+  },
+  {
+   "epoch": 5,
+   "train_loss": 1.1715118049988085,
+   "val_loss": 0.8642159040823816,
+   "val_token_accuracy": 0.7370159111377964,
+   "lr": 0.00012638888888888888,
+   "val_sequence_accuracy": 0.0,
+   "seconds": 34.8
+  },
+  {
+   "epoch": 6,
+   "train_loss": 0.8977760175719333,
+   "val_loss": 0.6632487543063706,
+   "val_token_accuracy": 0.7982587811468027,
+   "lr": 0.0001513888888888889,
+   "seconds": 29.1
+  },
+  {
+   "epoch": 7,
+   "train_loss": 0.6987696751691391,
+   "val_loss": 0.5376676998135564,
+   "val_token_accuracy": 0.8252776943860702,
+   "lr": 0.00017638888888888885,
+   "seconds": 28.5
+  },
+  {
+   "epoch": 8,
+   "train_loss": 0.5778143988126623,
+   "val_loss": 0.4701563847812938,
+   "val_token_accuracy": 0.8408886220354248,
+   "lr": 0.00020138888888888886,
+   "seconds": 28.4
+  },
+  {
+   "epoch": 9,
+   "train_loss": 0.497604714778338,
+   "val_loss": 0.4098287805069391,
+   "val_token_accuracy": 0.8691083758631042,
+   "lr": 0.00022638888888888887,
+   "seconds": 29.3
+  },
+  {
+   "epoch": 10,
+   "train_loss": 0.4331272790946108,
+   "val_loss": 0.35915595368199504,
+   "val_token_accuracy": 0.8799159411588112,
+   "lr": 0.00025138888888888883,
+   "val_sequence_accuracy": 0.0,
+   "seconds": 38.5
+  },
+  {
+   "epoch": 11,
+   "train_loss": 0.38884259698715595,
+   "val_loss": 0.31434544699036726,
+   "val_token_accuracy": 0.9012308616031222,
+   "lr": 0.00027638888888888884,
+   "seconds": 31.4
+  },
+  {
+   "epoch": 12,
+   "train_loss": 0.34319587031684395,
+   "val_loss": 0.26562180530019297,
+   "val_token_accuracy": 0.9117382167517262,
+   "lr": 0.0003,
+   "seconds": 30.6
+  },
+  {
+   "epoch": 13,
+   "train_loss": 0.29506338655986447,
+   "val_loss": 0.23609639107017896,
+   "val_token_accuracy": 0.9222455719003302,
+   "lr": 0.0002999365425123301,
+   "seconds": 30.2
+  },
+  {
+   "epoch": 14,
+   "train_loss": 0.26358209301610996,
+   "val_loss": 0.19374809145068522,
+   "val_token_accuracy": 0.9315520864605223,
+   "lr": 0.00029974622374069024,
+   "seconds": 31.0
+  },
+  {
+   "epoch": 15,
+   "train_loss": 0.2186605549606175,
+   "val_loss": 0.17872339872689763,
+   "val_token_accuracy": 0.9405583908736115,
+   "lr": 0.0002994292047137618,
+   "val_sequence_accuracy": 0.0,
+   "seconds": 35.5
+  },
+  {
+   "epoch": 16,
+   "train_loss": 0.18871319320331853,
+   "val_loss": 0.1394081772876838,
+   "val_token_accuracy": 0.9513659561693185,
+   "lr": 0.00029898575366129145,
+   "seconds": 31.3
+  },
+  {
+   "epoch": 17,
+   "train_loss": 0.15731601375473306,
+   "val_loss": 0.11899082104532041,
+   "val_token_accuracy": 0.9564695286700691,
+   "lr": 0.00029841624578714164,
+   "seconds": 30.5
+  },
+  {
+   "epoch": 18,
+   "train_loss": 0.13467338769046613,
+   "val_loss": 0.10780088073836544,
+   "val_token_accuracy": 0.9609726808766136,
+   "lr": 0.0002977211629518312,
+   "seconds": 31.6
+  },
+  {
+   "epoch": 19,
+   "train_loss": 0.1184059965865835,
+   "val_loss": 0.10889766933645297,
+   "val_token_accuracy": 0.9615731011708196,
+   "lr": 0.00029690109326483273,
+   "seconds": 31.4
+  },
+  {
+   "epoch": 20,
+   "train_loss": 0.1112428687404726,
+   "val_loss": 0.08562083386669858,
+   "val_token_accuracy": 0.968477934554188,
+   "lr": 0.00029595673058697357,
+   "val_sequence_accuracy": 0.1388888888888889,
+   "seconds": 37.6
+  },
+  {
+   "epoch": 21,
+   "train_loss": 0.10672598179896699,
+   "val_loss": 0.07246099308880197,
+   "val_token_accuracy": 0.9747823476433504,
+   "lr": 0.0002948888739433602,
+   "seconds": 30.4
+  },
+  {
+   "epoch": 22,
+   "train_loss": 0.0879412094412813,
+   "val_loss": 0.0668675422789241,
+   "val_token_accuracy": 0.9756829780846593,
+   "lr": 0.00029369842684732334,
+   "seconds": 30.6
+  },
+  {
+   "epoch": 23,
+   "train_loss": 0.07479681299159814,
+   "val_loss": 0.05665609075684191,
+   "val_token_accuracy": 0.9771840288201741,
+   "lr": 0.00029238639653595506,
+   "seconds": 30.5
+  },
+  {
+   "epoch": 24,
+   "train_loss": 0.0641102932979889,
+   "val_loss": 0.053160091085374554,
+   "val_token_accuracy": 0.9816871810267187,
+   "lr": 0.0002909538931178862,
+   "seconds": 29.8
+  },
+  {
+   "epoch": 25,
+   "train_loss": 0.058470417047970714,
+   "val_loss": 0.04724066925948892,
+   "val_token_accuracy": 0.9825878114680276,
+   "lr": 0.0002894021286340233,
+   "val_sequence_accuracy": 0.3611111111111111,
+   "seconds": 37.1
+  },
+  {
+   "epoch": 26,
+   "train_loss": 0.052572987238890805,
+   "val_loss": 0.04188503461650312,
+   "val_token_accuracy": 0.9864905433803662,
+   "lr": 0.0002877324160320411,
+   "seconds": 29.7
+  },
+  {
+   "epoch": 27,
+   "train_loss": 0.046411558497651106,
+   "val_loss": 0.039087515097325075,
+   "val_token_accuracy": 0.9879915941158811,
+   "lr": 0.0002859461680554975,
+   "seconds": 31.0
+  },
+  {
+   "epoch": 28,
+   "train_loss": 0.04519587698049879,
+   "val_loss": 0.03607919116128998,
+   "val_token_accuracy": 0.9861903332332633,
+   "lr": 0.0002840448960485118,
+   "seconds": 30.7
+  },
+  {
+   "epoch": 29,
+   "train_loss": 0.038729584668237706,
+   "val_loss": 0.030262568570210462,
+   "val_token_accuracy": 0.989192434704293,
+   "lr": 0.00028203020867701665,
+   "seconds": 29.9
+  },
+  {
+   "epoch": 30,
+   "train_loss": 0.036490252512211434,
+   "val_loss": 0.03102074914000407,
+   "val_token_accuracy": 0.9912939057340138,
+   "lr": 0.0002799038105676658,
+   "val_sequence_accuracy": 0.4722222222222222,
+   "seconds": 35.7
+  },
+  {
+   "epoch": 31,
+   "train_loss": 0.03519388155923361,
+   "val_loss": 0.02955453794676597,
+   "val_token_accuracy": 0.9882918042629841,
+   "lr": 0.00027766750086554993,
+   "seconds": 30.3
+  },
+  {
+   "epoch": 32,
+   "train_loss": 0.02971965968426755,
+   "val_loss": 0.02881140409065989,
+   "val_token_accuracy": 0.9903932752927049,
+   "lr": 0.00027532317171194046,
+   "seconds": 30.9
+  },
+  {
+   "epoch": 33,
+   "train_loss": 0.028717520992604214,
+   "val_loss": 0.027431230789094634,
+   "val_token_accuracy": 0.9915941158811168,
+   "lr": 0.00027287280664334875,
+   "seconds": 30.0
+  },
+  {
+   "epoch": 34,
+   "train_loss": 0.025515785276146938,
+   "val_loss": 0.02456412161357927,
+   "val_token_accuracy": 0.9921945361753227,
+   "lr": 0.00027031847891325657,
+   "seconds": 34.8
+  },
+  {
+   "epoch": 35,
+   "train_loss": 0.025936165574178098,
+   "val_loss": 0.022871447588406285,
+   "val_token_accuracy": 0.9924947463224257,
+   "lr": 0.0002676623497379363,
+   "val_sequence_accuracy": 0.5555555555555556,
+   "seconds": 36.4
+  },
+  {
+   "epoch": 36,
+   "train_loss": 0.023182472631093663,
+   "val_loss": 0.022257738886219323,
+   "val_token_accuracy": 0.9909936955869109,
+   "lr": 0.00026490666646784665,
+   "seconds": 29.6
+  },
+  {
+   "epoch": 37,
+   "train_loss": 0.02331909307367415,
+   "val_loss": 0.02036991666502528,
+   "val_token_accuracy": 0.9927949564695286,
+   "lr": 0.00026205376068614937,
+   "seconds": 29.9
+  },
+  {
+   "epoch": 38,
+   "train_loss": 0.020673630902889588,
+   "val_loss": 0.022313475886740614,
+   "val_token_accuracy": 0.9912939057340138,
+   "lr": 0.0002591060462359573,
+   "seconds": 30.4
+  },
+  {
+   "epoch": 39,
+   "train_loss": 0.02011774964829386,
+   "val_loss": 0.01963573465242879,
+   "val_token_accuracy": 0.9930951666166317,
+   "lr": 0.00025606601717798207,
+   "seconds": 30.5
+  },
+  {
+   "epoch": 40,
+   "train_loss": 0.01984954025737335,
+   "val_loss": 0.021266597414546385,
+   "val_token_accuracy": 0.9936955869108376,
+   "lr": 0.00025293624568031,
+   "val_sequence_accuracy": 0.6111111111111112,
+   "seconds": 37.5
+  },
+  {
+   "epoch": 41,
+   "train_loss": 0.017284853136150736,
+   "val_loss": 0.019581620236151356,
+   "val_token_accuracy": 0.9936955869108376,
+   "lr": 0.00024971937984209064,
+   "seconds": 30.3
+  },
+  {
+   "epoch": 42,
+   "train_loss": 0.016102865927826036,
+   "val_loss": 0.018957413022281423,
+   "val_token_accuracy": 0.9936955869108376,
+   "lr": 0.0002464181414529809,
+   "seconds": 30.3
+  },
+  {
+   "epoch": 43,
+   "train_loss": 0.01584431819503483,
+   "val_loss": 0.019109375744664394,
+   "val_token_accuracy": 0.9939957970579406,
+   "lr": 0.00024303532369023898,
+   "seconds": 30.8
+  },
+  {
+   "epoch": 44,
+   "train_loss": 0.01291918477490144,
+   "val_loss": 0.0177213518154206,
+   "val_token_accuracy": 0.9936955869108376,
+   "lr": 0.00023957378875541792,
+   "seconds": 29.8
+  },
+  {
+   "epoch": 45,
+   "train_loss": 0.01267552929608758,
+   "val_loss": 0.01771687082968668,
+   "val_token_accuracy": 0.9942960072050435,
+   "lr": 0.00023603646545265687,
+   "val_sequence_accuracy": 0.6666666666666666,
+   "seconds": 37.4
+  },
+  {
+   "epoch": 46,
+   "train_loss": 0.012532264091661917,
+   "val_loss": 0.01855374333350571,
+   "val_token_accuracy": 0.9933953767637346,
+   "lr": 0.0002324263467106209,
+   "seconds": 30.0
+  },
+  {
+   "epoch": 47,
+   "train_loss": 0.012044118078498993,
+   "val_loss": 0.018740193321137806,
+   "val_token_accuracy": 0.9939957970579406,
+   "lr": 0.00022874648705018398,
+   "seconds": 30.8
+  },
+  {
+   "epoch": 48,
+   "train_loss": 0.011598011841767793,
+   "val_loss": 0.017198363277659657,
+   "val_token_accuracy": 0.9936955869108376,
+   "lr": 0.000225,
+   "seconds": 30.0
+  },
+  {
+   "epoch": 49,
+   "train_loss": 0.010371406178024439,
+   "val_loss": 0.017738002968358764,
+   "val_token_accuracy": 0.9942960072050435,
+   "lr": 0.00022119005546214604,
+   "seconds": 29.8
+  },
+  {
+   "epoch": 50,
+   "train_loss": 0.010303301935164546,
+   "val_loss": 0.01879616936400904,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00021731987703006933,
+   "val_sequence_accuracy": 0.6944444444444444,
+   "seconds": 36.8
+  },
+  {
+   "epoch": 51,
+   "train_loss": 0.011712049816989926,
+   "val_loss": 0.01982066391723153,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.0002133927392611049,
+   "seconds": 29.9
+  },
+  {
+   "epoch": 52,
+   "train_loss": 0.010057086458775757,
+   "val_loss": 0.018474820427847084,
+   "val_token_accuracy": 0.9933953767637346,
+   "lr": 0.0002094119649058735,
+   "seconds": 29.9
+  },
+  {
+   "epoch": 53,
+   "train_loss": 0.009074899425607156,
+   "val_loss": 0.01799515580030953,
+   "val_token_accuracy": 0.9948964274992494,
+   "lr": 0.00020538092209690265,
+   "seconds": 29.4
+  },
+  {
+   "epoch": 54,
+   "train_loss": 0.008535635049585084,
+   "val_loss": 0.018478493815435013,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00020130302149885031,
+   "seconds": 30.1
+  },
+  {
+   "epoch": 55,
+   "train_loss": 0.008768605646132436,
+   "val_loss": 0.018423288381182908,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00019718171342274205,
+   "val_sequence_accuracy": 0.7222222222222222,
+   "seconds": 37.2
+  },
+  {
+   "epoch": 56,
+   "train_loss": 0.00844784009029642,
+   "val_loss": 0.017059238578065117,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00019302048490666353,
+   "seconds": 29.8
+  },
+  {
+   "epoch": 57,
+   "train_loss": 0.006852595609006651,
+   "val_loss": 0.01811889477669119,
+   "val_token_accuracy": 0.9939957970579406,
+   "lr": 0.0001888228567653781,
+   "seconds": 29.7
+  },
+  {
+   "epoch": 58,
+   "train_loss": 0.007689145142359512,
+   "val_loss": 0.019050383547791237,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00018459238061136602,
+   "seconds": 29.7
+  },
+  {
+   "epoch": 59,
+   "train_loss": 0.007318887351141731,
+   "val_loss": 0.01891389892625848,
+   "val_token_accuracy": 0.9942960072050435,
+   "lr": 0.0001803326358498057,
+   "seconds": 30.6
+  },
+  {
+   "epoch": 60,
+   "train_loss": 0.005752440799052912,
+   "val_loss": 0.017221242305717824,
+   "val_token_accuracy": 0.9948964274992494,
+   "lr": 0.00017604722665003956,
+   "val_sequence_accuracy": 0.7222222222222222,
+   "seconds": 36.4
+  },
+  {
+   "epoch": 61,
+   "train_loss": 0.005803059941483188,
+   "val_loss": 0.016325543780540765,
+   "val_token_accuracy": 0.9951966376463525,
+   "lr": 0.00017173977889608697,
+   "seconds": 29.9
+  },
+  {
+   "epoch": 62,
+   "train_loss": 0.00640924295404328,
+   "val_loss": 0.01759587846491156,
+   "val_token_accuracy": 0.9939957970579406,
+   "lr": 0.00016741393711878453,
+   "seconds": 29.6
+  },
+  {
+   "epoch": 63,
+   "train_loss": 0.005774801777779796,
+   "val_loss": 0.01784147124338243,
+   "val_token_accuracy": 0.9948964274992494,
+   "lr": 0.00016307336141214873,
+   "seconds": 29.7
+  },
+  {
+   "epoch": 64,
+   "train_loss": 0.006184827533581733,
+   "val_loss": 0.02017369864721559,
+   "val_token_accuracy": 0.9939957970579406,
+   "lr": 0.00015872172433657134,
+   "seconds": 29.8
+  },
+  {
+   "epoch": 65,
+   "train_loss": 0.005756925291114636,
+   "val_loss": 0.017352961802296507,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.0001543627078114667,
+   "val_sequence_accuracy": 0.6666666666666666,
+   "seconds": 37.0
+  },
+  {
+   "epoch": 66,
+   "train_loss": 0.0060024268208357595,
+   "val_loss": 0.01720469539408541,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00015,
+   "seconds": 29.9
+  },
+  {
+   "epoch": 67,
+   "train_loss": 0.005145496503510827,
+   "val_loss": 0.016835029267727505,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00014563729218853327,
+   "seconds": 30.6
+  },
+  {
+   "epoch": 68,
+   "train_loss": 0.004954560360253675,
+   "val_loss": 0.016801590806880366,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00014127827566342863,
+   "seconds": 30.0
+  },
+  {
+   "epoch": 69,
+   "train_loss": 0.004892489990239491,
+   "val_loss": 0.0186672170476776,
+   "val_token_accuracy": 0.9942960072050435,
+   "lr": 0.00013692663858785124,
+   "seconds": 29.9
+  },
+  {
+   "epoch": 70,
+   "train_loss": 0.005633145832734005,
+   "val_loss": 0.018584192141664613,
+   "val_token_accuracy": 0.9951966376463525,
+   "lr": 0.00013258606288121542,
+   "val_sequence_accuracy": 0.7222222222222222,
+   "seconds": 36.1
+  },
+  {
+   "epoch": 71,
+   "train_loss": 0.005177047883785499,
+   "val_loss": 0.02126901882835665,
+   "val_token_accuracy": 0.9942960072050435,
+   "lr": 0.000128260221103913,
+   "seconds": 28.1
+  },
+  {
+   "epoch": 72,
+   "train_loss": 0.00440732812229325,
+   "val_loss": 0.01866901517951656,
+   "val_token_accuracy": 0.9948964274992494,
+   "lr": 0.00012395277334996044,
+   "seconds": 29.7
+  },
+  {
+   "epoch": 73,
+   "train_loss": 0.004745687823977205,
+   "val_loss": 0.0168719527583387,
+   "val_token_accuracy": 0.9957970579405584,
+   "lr": 0.00011966736415019432,
+   "seconds": 30.7
+  },
+  {
+   "epoch": 74,
+   "train_loss": 0.004735845987353455,
+   "val_loss": 0.016389070868858952,
+   "val_token_accuracy": 0.9948964274992494,
+   "lr": 0.00011540761938863397,
+   "seconds": 30.7
+  },
+  {
+   "epoch": 75,
+   "train_loss": 0.004943963652773799,
+   "val_loss": 0.017633645819610248,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 0.00011117714323462186,
+   "val_sequence_accuracy": 0.6944444444444444,
+   "seconds": 38.6
+  },
+  {
+   "epoch": 76,
+   "train_loss": 0.0049445619686187695,
+   "val_loss": 0.015935219697798517,
+   "val_token_accuracy": 0.9954968477934554,
+   "lr": 0.0001069795150933365,
+   "seconds": 30.6
+  },
+  {
+   "epoch": 77,
+   "train_loss": 0.004338097297330377,
+   "val_loss": 0.017351153057406334,
+   "val_token_accuracy": 0.9960972680876614,
+   "lr": 0.00010281828657725797,
+   "seconds": 31.2
+  },
+  {
+   "epoch": 78,
+   "train_loss": 0.004083333619379858,
+   "val_loss": 0.016367756696605253,
+   "val_token_accuracy": 0.9954968477934554,
+   "lr": 9.869697850114969e-05,
+   "seconds": 31.2
+  },
+  {
+   "epoch": 79,
+   "train_loss": 0.004823046299480557,
+   "val_loss": 0.01778954412162984,
+   "val_token_accuracy": 0.9951966376463525,
+   "lr": 9.461907790309734e-05,
+   "seconds": 31.1
+  },
+  {
+   "epoch": 80,
+   "train_loss": 0.0038478313126473424,
+   "val_loss": 0.01781138590629557,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 9.058803509412646e-05,
+   "val_sequence_accuracy": 0.6666666666666666,
+   "seconds": 37.2
+  },
+  {
+   "epoch": 81,
+   "train_loss": 0.0041260912113480095,
+   "val_loss": 0.017200590852375137,
+   "val_token_accuracy": 0.9951966376463525,
+   "lr": 8.660726073889511e-05,
+   "seconds": 30.5
+  },
+  {
+   "epoch": 82,
+   "train_loss": 0.0034105379477185616,
+   "val_loss": 0.017476860612616305,
+   "val_token_accuracy": 0.9960972680876614,
+   "lr": 8.268012296993067e-05,
+   "seconds": 30.7
+  },
+  {
+   "epoch": 83,
+   "train_loss": 0.0031404782166254007,
+   "val_loss": 0.0180607565229351,
+   "val_token_accuracy": 0.9951966376463525,
+   "lr": 7.880994453785393e-05,
+   "seconds": 30.7
+  },
+  {
+   "epoch": 84,
+   "train_loss": 0.004147345160528817,
+   "val_loss": 0.017791612665117217,
+   "val_token_accuracy": 0.9960972680876614,
+   "lr": 7.500000000000002e-05,
+   "seconds": 30.7
+  },
+  {
+   "epoch": 85,
+   "train_loss": 0.0038509737485142932,
+   "val_loss": 0.017819950899628727,
+   "val_token_accuracy": 0.9945962173521465,
+   "lr": 7.125351294981598e-05,
+   "val_sequence_accuracy": 0.6944444444444444,
+   "seconds": 38.8
+  }
+ ],
+ "best_epoch": 70,
+ "best_val_sequence_accuracy": 0.7222222222222222,
+ "test": {
+  "n": 36,
+  "token_accuracy": 0.9970041941282205,
+  "sequence_accuracy": 0.8055555555555556,
+  "symbolic_accuracy": 0.8055555555555556,
+  "greedy_sequence_accuracy": 0.7777777777777778,
+  "valid_expressions": 1.0
+ },
+ "predictions": [
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-3.txt",
+   "line": 22,
+   "amp_tokens": 139,
+   "prediction": "/ + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_tt INT+ 2 ^ m_u INT+ 2 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_13 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 + * INT+ 1 2 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_tt INT+ 2 ^ m_u INT+ 2 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_13 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 + * INT+ 1 2 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-3.txt",
+   "line": 28,
+   "amp_tokens": 138,
+   "prediction": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_u INT+ 2 + * INT- 3 2 * ^ e INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 3 2 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 + * INT+ 3 2 * ^ e INT+ 4 * s_12 s_34 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_u INT+ 2 + * INT- 3 2 * ^ e INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 3 2 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 + * INT+ 3 2 * ^ e INT+ 4 * s_12 s_34 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-1.txt",
+   "line": 37,
+   "amp_tokens": 139,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_mu INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_24 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_mu INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_mu INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_24 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_mu INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-3.txt",
+   "line": 39,
+   "amp_tokens": 255,
+   "prediction": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_13 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_13 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-5.txt",
+   "line": 9,
+   "amp_tokens": 253,
+   "prediction": "/ + * INT- 1 2 8 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT- 6 4 * ^ e INT+ 4 * ^ m_u INT+ 2 s_12 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 6 4 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 * INT+ 6 4 * ^ e INT+ 4 * s_14 s_24 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT- 8 * ^ e INT+ 4 ^ m_s INT+ 4 + * INT- 4 * ^ e INT+ 4 * ^ m_s INT+ 2 s_12 + * INT+ 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 4 * ^ e INT+ 4 * ^ m_s INT+ 2 s_24 * INT+ 4 * ^ e INT+ 4 * s_14 s_24 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": false
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-5.txt",
+   "line": 24,
+   "amp_tokens": 256,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_s INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 1 6 * ^ e INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_s INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 1 6 * ^ e INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-7.txt",
+   "line": 20,
+   "amp_tokens": 257,
+   "prediction": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_c INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 2 5 6 * ^ e INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_c INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_c INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 2 5 6 * ^ e INT+ 4 * ^ m_c INT+ 2 s_14 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_c INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-0.txt",
+   "line": 54,
+   "amp_tokens": 262,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_e INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_e INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_e INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_e INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_e INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_e INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_e INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_e INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-8.txt",
+   "line": 9,
+   "amp_tokens": 253,
+   "prediction": "/ + * INT- 1 2 8 * ^ e INT+ 4 ^ m_b INT+ 4 + * INT- 6 4 * ^ e INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_14 + * INT+ 6 4 * ^ e INT+ 4 * ^ m_b INT+ 2 s_24 * INT+ 6 4 * ^ e INT+ 4 * s_14 s_24 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT- 8 * ^ e INT+ 4 ^ m_b INT+ 4 + * INT- 4 * ^ e INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_14 + * INT+ 4 * ^ e INT+ 4 * ^ m_b INT+ 2 s_24 * INT+ 4 * ^ e INT+ 4 * s_14 s_24 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": false
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-2.txt",
+   "line": 6,
+   "amp_tokens": 133,
+   "prediction": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_t INT+ 2 ^ m_tt INT+ 2 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_t INT+ 2 s_34 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_12 + * INT+ 3 2 * ^ e INT+ 4 * s_13 s_24 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_t INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_t INT+ 2 ^ m_tt INT+ 2 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_t INT+ 2 s_34 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_12 + * INT+ 3 2 * ^ e INT+ 4 * s_13 s_24 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_t INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-1.txt",
+   "line": 36,
+   "amp_tokens": 139,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_mu INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_24 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_mu INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_mu INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_24 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_mu INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-3.txt",
+   "line": 7,
+   "amp_tokens": 134,
+   "prediction": "/ + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_c INT+ 2 ^ m_u INT+ 2 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_c INT+ 2 s_12 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 + * INT+ 1 2 8 * ^ e INT+ 4 * s_13 s_24 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_c INT+ 2 ^ m_u INT+ 2 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_c INT+ 2 s_12 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 + * INT+ 1 2 8 * ^ e INT+ 4 * s_13 s_24 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-1.txt",
+   "line": 46,
+   "amp_tokens": 262,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_mu INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_mu INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-1.txt",
+   "line": 13,
+   "amp_tokens": 135,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 ^ m_t INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_24 + * INT- 8 * ^ e INT+ 4 * ^ m_t INT+ 2 s_13 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 ^ + * INT+ 2 ^ m_mu INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 ^ m_t INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_24 + * INT- 8 * ^ e INT+ 4 * ^ m_t INT+ 2 s_13 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 ^ + * INT+ 2 ^ m_mu INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-4.txt",
+   "line": 36,
+   "amp_tokens": 258,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_d INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_d INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_d INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_d INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-3.txt",
+   "line": 38,
+   "amp_tokens": 258,
+   "prediction": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_13 + * INT- 2 5 6 * ^ e INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_13 + * INT- 2 5 6 * ^ e INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-4.txt",
+   "line": 31,
+   "amp_tokens": 256,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_d INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_14 + * INT+ 1 6 * ^ e INT+ 4 * ^ m_d INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_d INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_14 + * INT+ 1 6 * ^ e INT+ 4 * ^ m_d INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-1.txt",
+   "line": 50,
+   "amp_tokens": 259,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_mu INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_14 + * INT+ 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_mu INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_14 + * INT+ 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-8.txt",
+   "line": 3,
+   "amp_tokens": 134,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_t INT+ 2 + * INT+ 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 8 * ^ e INT+ 4 * ^ m_t INT+ 2 s_34 + * INT+ 8 * ^ e INT+ 4 * s_13 s_24 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_b INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_t INT+ 2 + * INT+ 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_34 + * INT+ 8 * ^ e INT+ 4 * ^ m_t INT+ 2 s_12 + * INT+ 8 * ^ e INT+ 4 * s_13 s_24 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_b INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": false
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-1.txt",
+   "line": 47,
+   "amp_tokens": 262,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_mu INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_mu INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-1.txt",
+   "line": 24,
+   "amp_tokens": 139,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 ^ m_s INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_24 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_mu INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 ^ m_s INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_24 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_mu INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-4.txt",
+   "line": 8,
+   "amp_tokens": 135,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_d INT+ 2 + * INT+ 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_34 + * INT+ 8 * ^ e INT+ 4 * s_13 s_24 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_b INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_d INT+ 2 + * INT+ 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_34 + * INT+ 8 * ^ e INT+ 4 * s_13 s_24 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": false
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-3.txt",
+   "line": 41,
+   "amp_tokens": 258,
+   "prediction": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_13 + * INT- 2 5 6 * ^ e INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_13 + * INT- 2 5 6 * ^ e INT+ 4 * ^ m_u INT+ 2 s_14 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-4.txt",
+   "line": 21,
+   "amp_tokens": 138,
+   "prediction": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_c INT+ 2 ^ m_d INT+ 2 + * INT- 3 2 * ^ e INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 3 2 * ^ e INT+ 4 * ^ m_d INT+ 2 s_24 + * INT+ 3 2 * ^ e INT+ 4 * s_12 s_34 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_c INT+ 2 ^ m_d INT+ 2 + * INT- 3 2 * ^ e INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 3 2 * ^ e INT+ 4 * ^ m_d INT+ 2 s_24 + * INT+ 3 2 * ^ e INT+ 4 * s_12 s_34 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-1.txt",
+   "line": 43,
+   "amp_tokens": 261,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_mu INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_mu INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_13 + * INT- 1 6 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_14 + * INT+ 8 * ^ e INT+ 4 * ^ m_mu INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-5.txt",
+   "line": 8,
+   "amp_tokens": 135,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_s INT+ 2 + * INT+ 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_34 + * INT+ 8 * ^ e INT+ 4 * s_13 s_24 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_b INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_s INT+ 2 + * INT+ 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_12 + * INT+ 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_34 + * INT+ 8 * ^ e INT+ 4 * s_13 s_24 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_s INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": false
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-4.txt",
+   "line": 12,
+   "amp_tokens": 140,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_d INT+ 2 ^ m_s INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_24 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_d INT+ 2 ^ m_s INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_24 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-6.txt",
+   "line": 29,
+   "amp_tokens": 258,
+   "prediction": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_tt INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_13 + * INT- 2 5 6 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_14 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_tt INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_13 + * INT- 2 5 6 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_14 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-4.txt",
+   "line": 26,
+   "amp_tokens": 140,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_d INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_24 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 1 6 * ^ e INT+ 4 * ^ m_b INT+ 2 ^ m_d INT+ 2 + * INT- 8 * ^ e INT+ 4 * ^ m_b INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_d INT+ 2 s_24 + * INT+ 8 * ^ e INT+ 4 * s_12 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_d INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-7.txt",
+   "line": 1,
+   "amp_tokens": 125,
+   "prediction": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_c INT+ 2 ^ m_c INT+ 2 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_c INT+ 2 s_12 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_e INT+ 2 s_34 + * INT+ 3 2 * ^ e INT+ 4 * s_13 s_24 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_c INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_c INT+ 2 ^ m_e INT+ 2 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_c INT+ 2 s_34 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_e INT+ 2 s_12 + * INT+ 3 2 * ^ e INT+ 4 * s_13 s_24 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_c INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": false
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-9.txt",
+   "line": 8,
+   "amp_tokens": 244,
+   "prediction": "/ + * INT- 2 5 6 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_u INT+ 2 s_23 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_23 s_24 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "reference": "/ + * INT- 2 5 6 * ^ e INT+ 4 ^ m_u INT+ 4 + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_u INT+ 2 s_23 + * INT+ 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_23 s_24 * INT+ 8 1 ^ + reg_prop * INT- 2 s_23 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-0.txt",
+   "line": 35,
+   "amp_tokens": 138,
+   "prediction": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_c INT+ 2 ^ m_e INT+ 2 + * INT- 3 2 * ^ e INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 3 2 * ^ e INT+ 4 * ^ m_e INT+ 2 s_24 + * INT+ 3 2 * ^ e INT+ 4 * s_12 s_34 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_e INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_c INT+ 2 ^ m_e INT+ 2 + * INT- 3 2 * ^ e INT+ 4 * ^ m_c INT+ 2 s_13 + * INT- 3 2 * ^ e INT+ 4 * ^ m_e INT+ 2 s_24 + * INT+ 3 2 * ^ e INT+ 4 * s_12 s_34 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 9 ^ + * INT+ 2 ^ m_e INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-3.txt",
+   "line": 18,
+   "amp_tokens": 138,
+   "prediction": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_s INT+ 2 ^ m_u INT+ 2 + * INT- 3 2 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 3 2 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 + * INT+ 3 2 * ^ e INT+ 4 * s_12 s_34 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "reference": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_s INT+ 2 ^ m_u INT+ 2 + * INT- 3 2 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 3 2 * ^ e INT+ 4 * ^ m_u INT+ 2 s_24 + * INT+ 3 2 * ^ e INT+ 4 * s_12 s_34 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT- 2 s_13 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-3.txt",
+   "line": 5,
+   "amp_tokens": 133,
+   "prediction": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_s INT+ 2 ^ m_u INT+ 2 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_s INT+ 2 s_12 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 + * INT+ 3 2 * ^ e INT+ 4 * s_13 s_24 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_s INT+ 2 ^ m_u INT+ 2 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_s INT+ 2 s_12 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_u INT+ 2 s_34 + * INT+ 3 2 * ^ e INT+ 4 * s_13 s_24 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_u INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-6.txt",
+   "line": 26,
+   "amp_tokens": 255,
+   "prediction": "/ + * INT+ 1 6 * ^ e INT+ 4 ^ m_tt INT+ 4 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_13 + * INT- 8 * ^ e INT+ 4 * ^ m_s INT+ 2 s_14 + * INT+ 1 6 * ^ e INT+ 4 * ^ m_s INT+ 2 s_34 * INT+ 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 2 5 6 * ^ e INT+ 4 ^ m_tt INT+ 4 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_13 + * INT- 1 2 8 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_14 + * INT+ 2 5 6 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_34 * INT+ 1 2 8 * ^ e INT+ 4 * s_14 s_34 * INT+ 8 1 ^ + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": false
+  },
+  {
+   "file": "QED-2-to-2-diag-TreeLevel-6.txt",
+   "line": 5,
+   "amp_tokens": 133,
+   "prediction": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_d INT+ 2 ^ m_tt INT+ 2 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_d INT+ 2 s_12 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_34 + * INT+ 3 2 * ^ e INT+ 4 * s_13 s_24 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_tt INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "reference": "/ + * INT+ 6 4 * ^ e INT+ 4 * ^ m_d INT+ 2 ^ m_tt INT+ 2 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_d INT+ 2 s_12 + * INT+ 3 2 * ^ e INT+ 4 * ^ m_tt INT+ 2 s_34 + * INT+ 3 2 * ^ e INT+ 4 * s_13 s_24 * INT+ 3 2 * ^ e INT+ 4 * s_14 s_23 * INT+ 8 1 ^ + * INT+ 2 ^ m_tt INT+ 2 + reg_prop * INT+ 2 s_12 INT+ 2",
+   "correct": true
+  }
+ ],
+ "expert_routing": {
+  "token_types": [
+   "SPECIAL",
+   "OP",
+   "DIGIT",
+   "MASS",
+   "MANDELSTAM",
+   "COUPLING",
+   "REGPROP",
+   "STRUCT"
+  ],
+  "counts": [
+   [
+    [
+     0,
+     55,
+     3,
+     6
+    ],
+    [
+     847,
+     198,
+     590,
+     231
+    ],
+    [
+     11,
+     397,
+     107,
+     307
+    ],
+    [
+     130,
+     19,
+     5,
+     9
+    ],
+    [
+     0,
+     119,
+     9,
+     107
+    ],
+    [
+     0,
+     5,
+     0,
+     175
+    ],
+    [
+     0,
+     33,
+     0,
+     3
+    ],
+    [
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   [
+    [
+     36,
+     0,
+     28,
+     0
+    ],
+    [
+     187,
+     959,
+     623,
+     97
+    ],
+    [
+     333,
+     211,
+     25,
+     253
+    ],
+    [
+     0,
+     0,
+     163,
+     0
+    ],
+    [
+     152,
+     8,
+     30,
+     45
+    ],
+    [
+     0,
+     0,
+     180,
+     0
+    ],
+    [
+     36,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0
+    ]
+   ]
+  ]
+ }
+}
